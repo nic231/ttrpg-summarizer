@@ -1,0 +1,5 @@
+openai-whisper
+ollama
+pyannote.audio==3.3.2
+# Note: pyannote.audio will install compatible versions of torch, torchaudio, and other dependencies
+# Version 3.3.2 is used for stability (v4.x has dependency issues)

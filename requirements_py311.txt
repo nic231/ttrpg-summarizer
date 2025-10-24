@@ -1,0 +1,30 @@
+# TTRPG Summarizer Requirements for Python 3.11
+# Optimized for RTX 5080 GPU support
+# Use this if you're having GPU compatibility issues with Python 3.13
+
+# Core AI/ML packages
+# Install PyTorch with CUDA support first (separate command recommended):
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+
+# Then install the rest:
+openai-whisper==20231117
+ollama>=0.1.0
+
+# Speaker Diarization
+pyannote.audio==3.3.2
+# pyannote.audio will automatically install:
+# - torch (compatible version)
+# - torchaudio (compatible version)
+# - asteroid-filterbanks
+# - einops
+# - pytorch-lightning
+# - torchmetrics
+# And other dependencies
+
+# NumPy - Compatible with both Whisper and pyannote
+numpy>=1.24.0,<2.0
+
+# Optional but recommended for better performance
+soundfile>=0.12.1
+librosa>=0.10.0  # For audio duration calculation and progress tracking
+pygame>=2.5.0  # For audio playback in speaker identification GUI
