@@ -1642,12 +1642,20 @@ Detailed Summary (ONLY based on actual transcript content):"""
         try:
             # Use a quick extraction prompt
             extraction_prompt = f"""Extract ALL character and NPC names from this TTRPG session summary.
+
+IMPORTANT RULES FOR NAMES:
+- Use ONLY the character's core name (e.g., "Jasper", "Annabelle", "Baron Abrams")
+- DO NOT add qualifiers like "(Player: Name)", "(NPC)", "(mentioned)", "(via remote)", etc.
+- DO NOT add parenthetical information to names
+- If a character has multiple forms of their name, use the most common/complete one
+- Examples: Use "Victor Temple" not "Victor Temple (Player: Dave)" or "Victor Temple (via remote support)"
+
 For EACH character/NPC mentioned, provide:
-1. Their name (or role if unnamed, like "tavern keeper", "mysterious figure")
+1. Their core name only (or role if unnamed, like "Tavern Keeper", "Mysterious Figure")
 2. A brief 1-sentence description of who they are or what they did
 
 Format your response EXACTLY as:
-NAME: [character name]
+NAME: [character name - NO parentheses or qualifiers]
 DESCRIPTION: [one sentence description]
 
 NAME: [next character]
@@ -1692,30 +1700,40 @@ Summary to analyze:
                 name = name.strip()
                 desc = descriptions[i].strip() if i < len(descriptions) else "No description"
 
-                # Add or update character
-                if name in self.characters:
-                    self.characters[name]['mentions'] += 1
+                # Normalize name by removing common qualifiers/parentheticals
+                # e.g., "Jasper (Player: Alexander)" -> "Jasper"
+                normalized_name = name
+                import re
+                # Remove patterns like "(Player: X)", "(mentioned...)", "(Potential NPC)", etc.
+                normalized_name = re.sub(r'\s*\([^)]*\)\s*$', '', normalized_name).strip()
+
+                # Also remove "via X" suffixes
+                normalized_name = re.sub(r'\s+via\s+.*$', '', normalized_name, flags=re.IGNORECASE).strip()
+
+                # Add or update character (use normalized name as key)
+                if normalized_name in self.characters:
+                    self.characters[normalized_name]['mentions'] += 1
 
                     # Merge information: Check if new description adds unique information
-                    old_desc = self.characters[name]['description'].lower()
+                    old_desc = self.characters[normalized_name]['description'].lower()
                     new_desc_lower = desc.lower()
 
                     # If descriptions are substantially different, merge them
                     # (avoids exact duplicates but preserves new info)
                     if new_desc_lower not in old_desc and old_desc not in new_desc_lower:
                         # New information found - append it
-                        self.characters[name]['description'] = f"{self.characters[name]['description']}; {desc}"
-                    elif len(desc) > len(self.characters[name]['description']):
+                        self.characters[normalized_name]['description'] = f"{self.characters[normalized_name]['description']}; {desc}"
+                    elif len(desc) > len(self.characters[normalized_name]['description']):
                         # New description is more detailed, replace it
-                        self.characters[name]['description'] = desc
+                        self.characters[normalized_name]['description'] = desc
                     # Otherwise keep existing description (new one is redundant/shorter)
                 else:
-                    self.characters[name] = {
+                    self.characters[normalized_name] = {
                         'first_appearance': chunk_number,
                         'description': desc,
                         'mentions': 1
                     }
-                    new_characters.append(name)
+                    new_characters.append(normalized_name)
 
             # Show new characters discovered in this chunk
             if new_characters:
@@ -4034,7 +4052,7 @@ def configuration_gui():
                 # Sanitize filename
                 safe_name = "".join(c for c in campaign_name if c.isalnum() or c in (' ', '-', '_')).strip()
                 safe_name = safe_name.replace(' ', '_')
-                char_file = npcs_dir / f"{safe_name}_characters.txt"
+                char_file = npcs_dir / f"{safe_name}_characters.md"
 
                 # Create initial file
                 with open(char_file, 'w', encoding='utf-8') as f:
@@ -4053,6 +4071,7 @@ def configuration_gui():
                 title="Select Campaign Character File",
                 initialdir=npcs_dir,
                 filetypes=[
+                    ("Markdown Files", "*.md"),
                     ("Text Files", "*.txt"),
                     ("All Files", "*.*")
                 ]
