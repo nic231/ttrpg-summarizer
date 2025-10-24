@@ -314,7 +314,8 @@ class TTRPGSummarizer:
 
         # Character/NPC tracking
         self.campaign_character_file = campaign_character_file
-        self.characters = {}  # Dict: {name: {first_appearance: chunk_num, description: str, mentions: count}}
+        self.characters = {}  # Dict: {name: {first_appearance: session_name, description: str, mentions: count}}
+        self.current_session_name = None  # Track current session being processed
 
         # Load existing characters from campaign file if provided
         if campaign_character_file and Path(campaign_character_file).exists():
@@ -1623,7 +1624,7 @@ Detailed Summary (ONLY based on actual transcript content):"""
         time.sleep(0.5)
 
         # Extract characters/NPCs from this chunk
-        self.extract_characters_from_summary(summary, chunk_number)
+        self.extract_characters_from_summary(summary, chunk_number, self.current_session_name)
 
         # Debug: Show current character count after extraction
         if self.characters:
@@ -1631,13 +1632,14 @@ Detailed Summary (ONLY based on actual transcript content):"""
 
         return summary
 
-    def extract_characters_from_summary(self, summary: str, chunk_number: int):
+    def extract_characters_from_summary(self, summary: str, chunk_number: int, session_name: str = None):
         """
         Extract character/NPC names and information from a summary using Ollama
 
         Args:
             summary: The chunk summary text
             chunk_number: Which chunk this is from
+            session_name: Name of the session (e.g., "Episode 1") for tracking first appearance
         """
         try:
             # Use a quick extraction prompt
@@ -1728,8 +1730,10 @@ Summary to analyze:
                         self.characters[normalized_name]['description'] = desc
                     # Otherwise keep existing description (new one is redundant/shorter)
                 else:
+                    # Use session name if available, otherwise fall back to chunk number
+                    first_appearance = f"{session_name} (Chunk {chunk_number})" if session_name else f"Chunk {chunk_number}"
                     self.characters[normalized_name] = {
-                        'first_appearance': chunk_number,
+                        'first_appearance': first_appearance,
                         'description': desc,
                         'mentions': 1
                     }
@@ -1751,17 +1755,17 @@ Summary to analyze:
                 content = f.read()
 
             # Parse character entries from the file
-            # Format: **Name**\n  First appeared: Session/Chunk X\n  Total mentions: X\n  Description: ...
+            # Format: **Name**\n  First appeared: [session info]\n  Total mentions: X\n  Description: ...
             import re
 
-            # Find all character blocks
-            char_pattern = r'\*\*(.+?)\*\*\s*\n\s*First appeared:\s*(?:Session/)?Chunk\s*(\d+)\s*\n\s*Total mentions:\s*(\d+)\s*\n\s*Description:\s*(.+?)(?=\n\n|\n\*\*|$)'
+            # Find all character blocks (flexible pattern to match session names)
+            char_pattern = r'\*\*(.+?)\*\*\s*\n\s*First appeared:\s*(.+?)\s*\n\s*Total mentions:\s*(\d+)\s*\n\s*Description:\s*(.+?)(?=\n\n|\n\*\*|$)'
             matches = re.findall(char_pattern, content, re.DOTALL | re.IGNORECASE)
 
-            for name, first_chunk, mentions, description in matches:
+            for name, first_appearance, mentions, description in matches:
                 name = name.strip()
                 self.characters[name] = {
-                    'first_appearance': int(first_chunk),
+                    'first_appearance': first_appearance.strip(),
                     'description': description.strip(),
                     'mentions': int(mentions)
                 }
@@ -1813,7 +1817,7 @@ Summary to analyze:
 
                     for name, info in sorted_chars:
                         f.write(f"**{name}**\n")
-                        f.write(f"  First appeared: Session/Chunk {info['first_appearance']}\n")
+                        f.write(f"  First appeared: {info['first_appearance']}\n")
                         f.write(f"  Total mentions: {info['mentions']}\n")
                         f.write(f"  Description: {info['description']}\n\n")
 
@@ -2424,6 +2428,8 @@ COMPREHENSIVE SESSION SUMMARY:"""
 
         # Create output directory
         session_name = "multi_file_session"
+        # Store session name for character tracking
+        self.current_session_name = session_name
         # Ensure base output_dir exists first
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         output_path = Path(output_dir) / session_name
@@ -2610,7 +2616,7 @@ COMPREHENSIVE SESSION SUMMARY:"""
 
                     for name, info in sorted_chars:
                         f.write(f"**{name}**\n")
-                        f.write(f"  First appeared: Chunk {info['first_appearance']}\n")
+                        f.write(f"  First appeared: {info['first_appearance']}\n")
                         f.write(f"  Mentioned: {info['mentions']} time(s)\n")
                         f.write(f"  Description: {info['description']}\n\n")
 
@@ -2690,6 +2696,8 @@ COMPREHENSIVE SESSION SUMMARY:"""
 
         # Create output directory with subfolder named after the audio file
         audio_name = Path(audio_file).stem
+        # Store session name for character tracking
+        self.current_session_name = audio_name
         # Ensure base output_dir exists first
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         output_path = Path(output_dir) / audio_name
@@ -2978,7 +2986,7 @@ COMPREHENSIVE SESSION SUMMARY:"""
 
                     for name, info in sorted_chars:
                         f.write(f"**{name}**\n")
-                        f.write(f"  First appeared: Chunk {info['first_appearance']}\n")
+                        f.write(f"  First appeared: {info['first_appearance']}\n")
                         f.write(f"  Mentioned: {info['mentions']} time(s)\n")
                         f.write(f"  Description: {info['description']}\n\n")
 
