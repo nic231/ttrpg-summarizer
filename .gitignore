@@ -45,9 +45,14 @@ output/
 
 # Temporary files
 *.tmp
+*.tmp.*
 *.temp
 .DS_Store
 Thumbs.db
+
+# Old versions (keep in git history, not working directory)
+*_py311 - v*.py
+ttrpg_summarizer.py
 
 # IDE files
 .vscode/
