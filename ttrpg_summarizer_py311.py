@@ -381,12 +381,13 @@ class TTRPGSummarizer:
                     self.unload_models()
                     raise KeyboardInterrupt("Processing stopped by user")
 
-    def transcribe_audio(self, audio_file: str) -> Dict:
+    def transcribe_audio(self, audio_file: str, use_vad: bool = False) -> Dict:
         """
         Convert audio file to text using Whisper
 
         Args:
             audio_file: Path to audio file (mp3, wav, m4a, etc.)
+            use_vad: Enable Voice Activity Detection to skip silence (useful for multi-file mode)
 
         Returns:
             Dictionary with transcription and metadata
@@ -448,12 +449,20 @@ class TTRPGSummarizer:
         sys.stdout = WhisperProgressFilter(original_stdout)
 
         try:
-            result = self.whisper_model.transcribe(
-                audio_path,  # Use converted WAV file for better GPU performance
-                language="en",
-                verbose=True,  # Enable verbose but filter transcript lines with custom writer
-                fp16=(self.device == "cuda")
-            )
+            # Build transcription parameters
+            transcribe_params = {
+                "audio": audio_path,  # Use converted WAV file for better GPU performance
+                "language": "en",
+                "verbose": True,  # Enable verbose but filter transcript lines with custom writer
+                "fp16": (self.device == "cuda")
+            }
+
+            # Enable VAD for multi-file mode to skip silence in individual speaker tracks
+            if use_vad:
+                transcribe_params["vad_filter"] = True
+                print("  VAD enabled: Will skip silent sections for faster processing\n")
+
+            result = self.whisper_model.transcribe(**transcribe_params)
         except Exception as e:
             # Restore stdout before re-raising
             sys.stdout = original_stdout
@@ -2367,7 +2376,8 @@ COMPREHENSIVE SESSION SUMMARY:"""
 
         for i, (audio_file, speaker) in enumerate(file_to_speaker.items(), 1):
             print(f"\n[File {i}/{len(file_to_speaker)}] Transcribing {speaker}...")
-            transcription_data = self.transcribe_audio(audio_file)
+            # Enable VAD in multi-file mode to skip silence in individual speaker tracks
+            transcription_data = self.transcribe_audio(audio_file, use_vad=True)
 
             # Add speaker to each segment
             for seg in transcription_data["segments"]:
