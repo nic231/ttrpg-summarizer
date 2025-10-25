@@ -3157,14 +3157,25 @@ def assign_speakers_to_files(audio_files: List[str]) -> Dict[str, str]:
         filename = Path(audio_file).name
 
         # Try to auto-detect speaker from Craig bot naming pattern
-        # Craig format: username_channelid.wav or username.wav
+        # Craig formats:
+        #   - "number-username.aac" (e.g., "1-nic_231.aac")
+        #   - "username_channelid.wav" (e.g., "nic_231_12345.wav")
+        #   - "username.wav"
         suggested_name = ""
-        if '_' in filename:
+        stem = Path(audio_file).stem  # filename without extension
+
+        # Check for Craig's "number-username" format (e.g., "1-nic_231")
+        if '-' in stem and stem.split('-')[0].isdigit():
+            # Extract username after the dash
+            parts = stem.split('-', 1)  # Split on first dash only
+            if len(parts) > 1:
+                suggested_name = parts[1]  # "nic_231"
+        elif '_' in stem:
             # Extract username before first underscore
-            suggested_name = filename.split('_')[0]
+            suggested_name = stem.split('_')[0]
         else:
             # Use filename without extension
-            suggested_name = Path(audio_file).stem
+            suggested_name = stem
 
         speaker_name = simpledialog.askstring(
             "Assign Speaker",
