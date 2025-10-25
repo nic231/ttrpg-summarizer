@@ -901,6 +901,53 @@ Now let me update the conversation transcript:
 
 ---
 
+**User:** <ide_selection>The user selected the lines 80 to 84 from e:\Dropbox\Python\TTRPG Sumariser\ttrpg_summarizer_py311.py:
+# Model defaults
+DEFAULT_WHISPER_MODEL = "large"
+DEFAULT_OLLAMA_MODEL = "qwen2.5:14b"
+DIARIZATION_MODEL = "pyannote/speaker-diarization-3.1"
+
+
+This may or may not be related to the current task.</ide_selection>Might be time to clean the code up again.
+I see things like this:
+# Model defaults
+DEFAULT_WHISPER_MODEL = "large"
+DEFAULT_OLLAMA_MODEL = "qwen2.5:14b"
+DIARIZATION_MODEL = "pyannote/speaker-diarization-3.1"
+
+
+But I know our defaut whisper model is currently set to medium.en
+
+**Assistant:** Great catch! You're absolutely right - there are outdated constants at the top of the file. Let me check what other inconsistencies there might be and clean them up:
+
+[Reads top of file showing constants section]
+
+Good catch! Line 81 says `DEFAULT_WHISPER_MODEL = "large"` but we changed the actual default to `"medium.en"` at line 3664. Let me check if these constants are actually being used anywhere:
+
+[Searches and finds constants are only defined, never used]
+
+They're only defined but **never used**! These are dead constants. The actual defaults are hardcoded elsewhere. Let me update them to match reality or remove them if unused:
+
+[Updates constants to correct values with descriptive comments]
+
+Good! Now let me check if there are other inconsistencies or outdated comments. Let me search for any TODOs or old comments:
+
+[Searches for TODO, FIXME, HACK, etc. - finds none, only legitimate "temp" references]
+
+Good - no TODOs or FIXMEs! The "temp" references are all legitimate (temporary files, temperature settings). Let me also check the version number and make sure the docstring is accurate:
+
+[Updates docstring to list current features and bumps version to 1.1.0]
+
+Perfect! Now let me commit these cleanups and update the conversation transcript:
+
+[Commits and pushes code cleanup changes]
+
+Now let me update the conversation transcript:
+
+[Updating transcript file...]
+
+---
+
 ## End of Transcript
 
 This transcript captures every message exchanged in this conversation, word for word, exactly as it appeared.
