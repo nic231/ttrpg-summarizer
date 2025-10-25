@@ -513,6 +513,16 @@ class TTRPGSummarizer:
         """
         Remove segments that are likely hallucinations (excessive repetition)
 
+        Whisper is known to hallucinate by repeating phrases, especially in:
+        - Silent sections
+        - Background noise
+        - Unclear audio
+
+        This filter catches:
+        1. Consecutive identical segments (immediate repetition)
+        2. Short phrases repeated 2+ times in recent history
+        3. Any text appearing 2+ times in last 5 segments
+
         Args:
             segments: List of transcription segments
 
@@ -524,26 +534,35 @@ class TTRPGSummarizer:
 
         cleaned = []
         recent_texts = []  # Track last 5 segments
+        prev_text = None   # Track immediate previous segment
 
         for seg in segments:
             text = seg["text"].strip().lower()
 
-            # Skip very short segments (less than 3 words)
-            if len(text.split()) < 3:
-                word_count = len(text.split())
-                # But allow them if they're not repetitive
-                if word_count > 0 and recent_texts.count(text) >= 2:
+            # Skip empty segments
+            if not text or len(text.split()) == 0:
+                continue
+
+            # Check for consecutive identical segments (most obvious hallucination)
+            if prev_text and text == prev_text:
+                # Skip this - it's an exact duplicate of the previous segment
+                continue
+
+            # Check for short phrases (< 5 words) repeated 2+ times in recent history
+            if len(text.split()) < 5:
+                if recent_texts.count(text) >= 2:
                     # This short phrase appeared 2+ times recently - likely hallucination
                     continue
 
-            # Check for excessive repetition in recent history
-            if len(recent_texts) >= 3:
-                # If this exact text appeared 3+ times in last 5 segments, skip it
-                if recent_texts.count(text) >= 3:
+            # Check for any text appearing 2+ times in last 5 segments (lowered from 3)
+            if len(recent_texts) >= 2:
+                if recent_texts.count(text) >= 2:
+                    # This text appeared 2+ times in recent history - likely hallucination
                     continue
 
             # Keep this segment
             cleaned.append(seg)
+            prev_text = text
 
             # Update recent history
             recent_texts.append(text)
