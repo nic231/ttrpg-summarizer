@@ -4024,6 +4024,19 @@ def configuration_gui():
                    variable=processing_mode_var, value="multi",
                    bg="white", font=("Arial", 10)).pack(anchor=tk.W, pady=2)
 
+    # Callback to show/hide speaker diarization based on processing mode
+    def on_processing_mode_change(*_):
+        """Hide speaker diarization in multi-file mode (speakers already known from filenames)"""
+        mode = processing_mode_var.get()
+        if mode == "multi":
+            # Multi-file mode: hide speaker diarization (not needed)
+            section3.pack_forget()
+        else:
+            # Single-file mode: show speaker diarization
+            section3.pack(fill=tk.X, pady=10)
+
+    processing_mode_var.trace_add('write', on_processing_mode_change)
+
     # ===== SECTION 2: Campaign Character File =====
     section2 = tk.LabelFrame(scrollable, text="  2. Campaign Character File (Optional)  ", font=("Arial", 12, "bold"),
                              bg="white", fg="#2c3e50", padx=15, pady=15)
