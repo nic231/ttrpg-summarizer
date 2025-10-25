@@ -948,6 +948,59 @@ Now let me update the conversation transcript:
 
 ---
 
+**User:** <ide_opened_file>The user opened the file e:\Dropbox\Python\TTRPG Sumariser\ttrpg_summarizer_py311.py in the IDE. This may or may not be related to the current task.</ide_opened_file>
+
+[User provides screenshot showing GUI with multi-file mode selected and Speaker Diarization section still visible]
+
+We don't use diarisation for multi files so we need to hide the option?
+
+**Assistant:** Excellent catch! You're absolutely right - when "Multiple files (one per speaker - Craig bot mode)" is selected, speaker diarization is unnecessary because each file already has a known speaker. Let me hide that section when multi-file mode is selected:
+
+[Searches for on_mode_change and processing_mode_var]
+
+Perfect! I found the `on_mode_change()` function at line 3772. Let me look at it:
+
+[Reads on_mode_change function]
+
+I see! This function handles showing/hiding sections for "Process Audio Files" vs "Generate Final Summary from Existing Chunks". But we need a **different** function to handle single-file vs multi-file mode. Let me search for where processing_mode_var changes are handled:
+
+[Searches and finds processing_mode_var only triggers update_time_estimate]
+
+The processing_mode_var only triggers `update_time_estimate`, not a visibility change. I need to add a new callback. Let me find where processing_mode_var is created and add a trace:
+
+[Reads processing mode radio button section]
+
+Good! Now I need to add a callback function to hide/show section3 (Speaker Diarization) based on processing mode. Let me add this after the radio buttons are created:
+
+[Adds on_processing_mode_change callback function]
+
+**User:** <system-reminder>
+PostToolUse:Edit hook additional context: <ide_diagnostics>[
+  {
+    "filePath": "/e:/Dropbox/Python/TTRPG Sumariser/ttrpg_summarizer_py311.py",
+    "line": 4028,
+    "column": 36,
+    "message": "\"args\" is not accessed",
+    "code": "",
+    "severity": "Hint"
+  }
+]</ide_diagnostics>
+</system-reminder>
+
+**Assistant:** Good catch by the IDE! Let me fix that unused parameter warning:
+
+[Changes *args to *_ and adds docstring]
+
+Perfect! Now let me commit this improvement and update the conversation transcript:
+
+[Commits and pushes changes]
+
+Now let me update the conversation transcript:
+
+[Updating transcript file...]
+
+---
+
 ## End of Transcript
 
 This transcript captures every message exchanged in this conversation, word for word, exactly as it appeared.
