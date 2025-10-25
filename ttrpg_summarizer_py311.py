@@ -3936,7 +3936,7 @@ def configuration_gui():
             filenames = filedialog.askopenfilenames(
                 title="Select Audio File(s)",
                 filetypes=[
-                    ("Audio Files", "*.mp3 *.wav *.m4a *.flac *.ogg"),
+                    ("Audio Files", "*.mp3 *.wav *.m4a *.flac *.ogg *.wma *.aac"),
                     ("All Files", "*.*")
                 ]
             )
