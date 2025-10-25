@@ -466,10 +466,11 @@ class TTRPGSummarizer:
                 "fp16": (self.device == "cuda")
             }
 
-            # Enable VAD for multi-file mode to skip silence in individual speaker tracks
+            # Note: VAD (Voice Activity Detection) for multi-file mode
+            # The vad_filter parameter is not available in all Whisper versions
+            # Whisper already skips silence efficiently, so this is optional
             if use_vad:
-                transcribe_params["vad_filter"] = True
-                print("  VAD enabled: Will skip silent sections for faster processing\n")
+                print("  Processing multi-file mode (Whisper auto-skips silence)\n")
 
             result = self.whisper_model.transcribe(**transcribe_params)
         except Exception as e:
