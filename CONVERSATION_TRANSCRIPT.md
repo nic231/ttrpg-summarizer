@@ -1054,6 +1054,60 @@ Now let me update the conversation transcript:
 
 ---
 
+**User:** <ide_selection>The user selected the line 85 from e:\Dropbox\Python\TTRPG Sumariser\summaries\multi_file_session\multi_file_session_transcript_formatted.txt:
+[18:06 - 21:53] Rory:
+I'm not sure what the server admin role is. I'm not sure what the server admin role is. I'm not sure what the server admin role is. Oh, that's right. We just come into this zone. And then we went in here and met the lady. I shot the things. I don't know what I'm meant to do now. Oh, there's one over there. Oh, there's one over there. Oh, there's one over there.
+
+This may or may not be related to the current task.</ide_selection>Ok take a look at the transcript here.
+It wasn't a TTPRG, just a chat as we played a game.
+It caught about 80% of what we said and we got some weird repeats that I know weren't actually said
+eg. I'm not sure what the server admin role is. I'm not sure what the server admin role is. I'm not sure what the server admin role is.
+I know Rory only said that once.
+
+**Assistant:** This is a known issue with Whisper - it sometimes hallucinates by repeating phrases, especially in sections with:
+- Background noise
+- Unclear audio
+- Long pauses
+- Gaming sessions (where there's often game audio mixing with speech)
+
+Looking at the transcript you selected, there are clear hallucinations:
+- "I'm not sure what the server admin role is." (repeated 3 times)
+- "Oh, there's one over there." (repeated 3 times)
+
+Let me check the current `filter_hallucinations()` function:
+
+[Reads filter_hallucinations function at lines 512-553]
+
+I found the issue! The current filter is not aggressive enough. It only catches repetitions if:
+1. Short phrases (<3 words) appear 2+ times
+2. Any text appears 3+ times in the last 5 segments
+
+But it's **not detecting consecutive identical segments** - which is the most obvious hallucination pattern. Looking at your example, if Whisper output three identical segments in a row, the filter would only catch the third one (when count reaches 3), but the first two would pass through.
+
+Let me improve the filter to be more aggressive:
+
+[Makes improved filter that catches consecutive duplicates, lowers threshold to 2 occurrences, and adds better documentation]
+
+Perfect! The improved filter now:
+
+1. **Catches consecutive duplicates immediately** - if the current segment matches the previous one, skip it
+2. **Lowered repetition threshold from 3 to 2** - any text appearing twice in 5 segments is filtered
+3. **Expanded short phrase threshold from <3 to <5 words** - short repeated phrases are more likely hallucinations
+4. **Added empty segment filtering** - skip blank segments
+5. **Better documentation** - explains Whisper's hallucination patterns
+
+This should catch those "I'm not sure what the server admin role is." repetitions that you saw!
+
+Let me commit and push this improvement:
+
+[Commits and pushes hallucination filter improvements]
+
+Now let me update the conversation transcript:
+
+[Updating transcript...]
+
+---
+
 ## End of Transcript
 
 This transcript captures every message exchanged in this conversation, word for word, exactly as it appeared.
