@@ -1,7 +1,15 @@
 """
 TTRPG Session Summarizer - Python 3.11 Optimized Version
 Converts audio recordings to text and generates summaries using Ollama
-GPU-ENABLED SPEAKER DIARIZATION for better performance!
+GPU-ENABLED SPEAKER DIARIZATION and TRANSCRIPTION for better performance!
+
+Features:
+    - Audio transcription using OpenAI Whisper (local GPU)
+    - Speaker diarization with PyAnnote Audio
+    - AI summarization using Ollama (qwen2.5:14b)
+    - Campaign character tracking across sessions
+    - VAD for multi-file mode efficiency
+    - Progressive context building for chunk summaries
 
 Requirements:
     Python 3.11
@@ -9,10 +17,10 @@ Requirements:
     pip install -r requirements_py311.txt
 
 Author: TTRPG Summarizer Team
-Version: 1.0.0
+Version: 1.1.0
 """
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 import sys
 import json
@@ -77,10 +85,10 @@ BANNER_SINGLE = "=" * 60
 BANNER_DOUBLE = "=" * 80
 SEPARATOR = "-" * 60
 
-# Model defaults
-DEFAULT_WHISPER_MODEL = "large"
-DEFAULT_OLLAMA_MODEL = "qwen2.5:14b"
-DIARIZATION_MODEL = "pyannote/speaker-diarization-3.1"
+# Model defaults (for reference - actual defaults set in GUI initialization)
+DEFAULT_WHISPER_MODEL = "medium.en"  # Fast English-only model
+DEFAULT_OLLAMA_MODEL = "qwen2.5:14b"  # Chunk and final summary model
+DIARIZATION_MODEL = "pyannote/speaker-diarization-3.1"  # Speaker identification
 
 # File extensions
 AUDIO_EXTENSIONS = ('.mp3', '.wav', '.m4a', '.flac', '.ogg', '.wma', '.aac')
