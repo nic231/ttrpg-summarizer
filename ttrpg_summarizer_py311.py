@@ -609,20 +609,27 @@ class TTRPGSummarizer:
             temp_wav.close()
 
             # Use ffmpeg to convert (Whisper already has ffmpeg dependency)
-            # Apply audio normalization to boost quiet audio for better Whisper transcription
+            # Apply audio normalization AND remove long silence (muted mic) to prevent hallucinations
             try:
-                # Two-pass normalization:
-                # 1. loudnorm filter analyzes and normalizes volume
-                # 2. Converts to 16kHz mono WAV
+                # Multi-stage audio processing:
+                # 1. silenceremove: Strip long silent sections (muted mic in Discord)
+                # 2. loudnorm: Normalize volume for consistent speech levels
+                # 3. Convert to 16kHz mono WAV
+
+                # silenceremove parameters:
+                # - stop_periods=-1: Process all silence throughout file
+                # - stop_duration=2: Remove silence longer than 2 seconds
+                # - stop_threshold=-50dB: Silence is below -50dB (catches muted mic)
+                # - detection=peak: Use peak detection for digital silence
                 subprocess.run(
                     ['ffmpeg', '-i', audio_file,
-                     '-af', 'loudnorm=I=-16:TP=-1.5:LRA=11',  # Normalize to -16 LUFS (speech standard)
+                     '-af', 'silenceremove=stop_periods=-1:stop_duration=2:stop_threshold=-50dB:detection=peak,loudnorm=I=-16:TP=-1.5:LRA=11',
                      '-ar', '16000', '-ac', '1', '-y', temp_wav_path],
                     capture_output=True,
                     text=True,
                     check=True
                 )
-                print(f"✓ Converted to WAV with audio normalization: {temp_wav_path}")
+                print(f"✓ Converted to WAV with silence removal + normalization")
                 return temp_wav_path, True
             except subprocess.CalledProcessError as e:
                 print(f"Error converting audio: {e.stderr}")
