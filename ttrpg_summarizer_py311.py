@@ -4507,13 +4507,14 @@ def configuration_gui():
 
     # Redirect stdout to console widget
     class ConsoleRedirector:
-        def __init__(self, text_widget, root_window, progress_callback=None):
+        def __init__(self, text_widget, root_window, progress_callback=None, original_stdout=None):
             self.text_widget = text_widget
             self.root = root_window
             self.encoding = 'utf-8'
             self.errors = 'replace'
             self.last_line_start = None  # Track where the last line started
             self.progress_callback = progress_callback  # Callback to update progress bar
+            self.original_stdout = original_stdout  # Store original stdout for dual output
 
         def write(self, message):
             try:
@@ -4547,12 +4548,25 @@ def configuration_gui():
                     self.text_widget.insert(tk.END, message)
                     self.last_line_start = None
 
+                    # ALSO print to original stdout (VS Code console) for debugging
+                    if self.original_stdout:
+                        try:
+                            self.original_stdout.write(message)
+                            self.original_stdout.flush()
+                        except:
+                            pass
+
                 self.text_widget.see(tk.END)
                 self.text_widget.config(state=tk.DISABLED)
                 self.root.update_idletasks()
-            except Exception:
-                # Silently ignore any errors to prevent blocking
-                pass
+            except Exception as e:
+                # Print errors to original stdout for debugging
+                if self.original_stdout:
+                    try:
+                        self.original_stdout.write(f"ConsoleRedirector error: {e}\n")
+                        self.original_stdout.flush()
+                    except:
+                        pass
 
         def _update_progress_from_message(self, message):
             """Extract progress info from message and update progress bar"""
@@ -4616,9 +4630,10 @@ def configuration_gui():
             reset_progress()
 
             # Redirect stdout and stderr to console
+            # Keep reference to original stdout for dual output (GUI + VS Code console)
             old_stdout = sys.stdout
             old_stderr = sys.stderr
-            redirector = ConsoleRedirector(console_text, root, progress_callback=update_progress)
+            redirector = ConsoleRedirector(console_text, root, progress_callback=update_progress, original_stdout=old_stdout)
             sys.stdout = redirector
             sys.stderr = redirector
 
