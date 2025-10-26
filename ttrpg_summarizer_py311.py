@@ -659,22 +659,19 @@ class TTRPGSummarizer:
             temp_wav.close()
 
             # Use ffmpeg to convert (Whisper already has ffmpeg dependency)
-            # Apply audio normalization to boost quiet audio
-            # NOTE: We do NOT remove silence because it would break timestamp alignment
-            # in multi-file mode where all speakers need to stay time-synchronized
+            # Skip loudnorm for now - it's slow (2-pass analysis) and VAD handles silence better
+            # Can re-enable if needed, but faster-whisper's VAD makes it less critical
             try:
-                # Two-stage audio processing:
-                # 1. loudnorm: Normalize volume for consistent speech levels
-                # 2. Convert to 16kHz mono WAV
+                # Fast conversion: Just downsample to 16kHz mono
+                # loudnorm disabled for speed - VAD handles quiet sections
                 subprocess.run(
                     ['ffmpeg', '-i', audio_file,
-                     '-af', 'loudnorm=I=-16:TP=-1.5:LRA=11',  # Normalize to -16 LUFS (speech standard)
                      '-ar', '16000', '-ac', '1', '-y', temp_wav_path],
                     capture_output=True,
                     text=True,
                     check=True
                 )
-                print(f"✓ Converted to WAV with audio normalization")
+                print(f"✓ Converted to WAV: {temp_wav_path}")
                 return temp_wav_path, True
             except subprocess.CalledProcessError as e:
                 print(f"Error converting audio: {e.stderr}")
