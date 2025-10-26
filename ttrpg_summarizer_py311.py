@@ -1510,16 +1510,8 @@ Brief summary (2-3 sentences):"""
         if context.get("party_members"):
             context_header += f"Party Members: {context['party_members']}\n"
 
-        # Add known characters (if any exist from previous chunks in this session)
-        if self.characters:
-            # Show top characters by mention count (most likely to reappear)
-            top_chars = sorted(self.characters.items(), key=lambda x: x[1]['mentions'], reverse=True)[:15]
-            context_header += f"\n**KNOWN CHARACTERS (from earlier in this session):**\n"
-            context_header += "⚠️ CRITICAL: Only mention these if they ACTUALLY appear in the transcript below!\n"
-            context_header += "Do NOT include them in your summary if they are not present in this segment.\n"
-            context_header += "This list is for REFERENCE ONLY to help you recognize characters who may reappear.\n\n"
-            for name, info in top_chars:
-                context_header += f"- {name}: {info['description']}\n"
+        # Note: Character context is NOT included in chunk summaries to reduce noise
+        # Characters are tracked and will be available in the final summary if needed
 
         if context_header:
             context_header = f"\n**CAMPAIGN CONTEXT:**\n{context_header}\n"
@@ -1865,7 +1857,7 @@ Summary to analyze:
             default_context_size: Default context size (None = unlimited)
 
         Returns:
-            Tuple of (model, target_words, context_size) or None if cancelled
+            Tuple of (model, target_words, context_size, include_characters) or None if cancelled
         """
         import tkinter as tk
 
@@ -1915,7 +1907,7 @@ Summary to analyze:
         result = [None]  # Store result
 
         def on_ok():
-            result[0] = (model_var.get(), target_words_var.get(), context_var.get())
+            result[0] = (model_var.get(), target_words_var.get(), context_var.get(), include_chars_var.get())
             dialog.destroy()
 
         def on_cancel():
@@ -1991,6 +1983,15 @@ Summary to analyze:
         tk.Label(words_frame, text="Target words:", bg="white", font=("Arial", 10), width=15, anchor=tk.W).pack(side=tk.LEFT)
         tk.Spinbox(words_frame, from_=500, to=5000, increment=100, textvariable=target_words_var,
                   width=10, font=("Arial", 10)).pack(side=tk.LEFT, padx=5)
+
+        # Character inclusion checkbox
+        include_chars_var = tk.BooleanVar(value=True)  # Default to True for backward compatibility
+        chars_frame = tk.Frame(settings_frame, bg="white")
+        chars_frame.pack(fill=tk.X, pady=5)
+        tk.Label(chars_frame, text="Include characters:", bg="white", font=("Arial", 10), width=15, anchor=tk.W).pack(side=tk.LEFT)
+        char_count = len(self.characters) if self.characters else 0
+        tk.Checkbutton(chars_frame, text=f"Include character list in summary ({char_count} character{'s' if char_count != 1 else ''} tracked)",
+                      variable=include_chars_var, bg="white", font=("Arial", 9)).pack(side=tk.LEFT, padx=5)
 
         # Context size
         context_var = tk.IntVar(value=smart_default)
@@ -2143,7 +2144,7 @@ Summary to analyze:
         dialog.wait_window()
         return result[0]
 
-    def create_overall_summary(self, chunk_summaries: List[str], context: Dict[str, str] = None, final_context_size: int = None, output_file: str = None) -> str:
+    def create_overall_summary(self, chunk_summaries: List[str], context: Dict[str, str] = None, final_context_size: int = None, output_file: str = None, include_characters: bool = True) -> str:
         """
         Create a final summary from all chunk summaries
 
@@ -2152,6 +2153,7 @@ Summary to analyze:
             context: Campaign context (system, setting, party members)
             final_context_size: Context window size for final summary (None = unlimited)
             output_file: Optional file path to stream summary directly to disk (reduces memory usage)
+            include_characters: Whether to include character list in the summary context
 
         Returns:
             Overall session summary (or file path if streaming to file)
@@ -2202,8 +2204,8 @@ Summary to analyze:
         if context.get("party_members"):
             context_header += f"Party Members: {context['party_members']}\n"
 
-        # Add all known characters for final summary (helps maintain consistency)
-        if self.characters:
+        # Add all known characters for final summary if requested
+        if include_characters and self.characters:
             # Show all characters sorted by mention count
             sorted_chars = sorted(self.characters.items(), key=lambda x: x[1]['mentions'], reverse=True)
             context_header += f"\n**CHARACTERS ENCOUNTERED THIS SESSION:**\n"
@@ -2599,11 +2601,12 @@ COMPREHENSIVE SESSION SUMMARY:"""
                 print("Chunk summaries have been saved. You can generate the final summary later.")
                 return None
 
-            model, target_words, context_size = config
+            model, target_words, context_size, include_chars = config
             print(f"\n✓ User confirmed settings:")
             print(f"  Model: {model}")
             print(f"  Target words: {target_words}")
             print(f"  Context size: {'Unlimited' if context_size >= 999999 else f'{context_size:,} tokens'}")
+            print(f"  Include characters: {'Yes' if include_chars else 'No'}")
 
             # Update instance settings for this run
             self.ollama_final_model = model
@@ -2618,7 +2621,8 @@ COMPREHENSIVE SESSION SUMMARY:"""
             chunk_summaries,
             context=campaign_context,
             final_context_size=context_size,
-            output_file=str(summary_file)
+            output_file=str(summary_file),
+            include_characters=include_chars
         )
         timings['summarization'] = time.time() - summarization_start
         print(f"✓ Overall summary saved to: {summary_file}")
@@ -2964,11 +2968,12 @@ COMPREHENSIVE SESSION SUMMARY:"""
                 print("Chunk summaries have been saved. You can generate the final summary later.")
                 return None
 
-            model, target_words, context_size = config
+            model, target_words, context_size, include_chars = config
             print(f"\n✓ User confirmed settings:")
             print(f"  Model: {model}")
             print(f"  Target words: {target_words}")
             print(f"  Context size: {'Unlimited' if context_size >= 999999 else f'{context_size:,} tokens'}")
+            print(f"  Include characters: {'Yes' if include_chars else 'No'}")
 
             # Update instance settings for this run
             self.ollama_final_model = model
@@ -2988,7 +2993,8 @@ COMPREHENSIVE SESSION SUMMARY:"""
             chunk_summaries,
             context=campaign_context,
             final_context_size=context_size,
-            output_file=str(summary_file)
+            output_file=str(summary_file),
+            include_characters=include_chars
         )
         timings['summarization'] = time.time() - summarization_start
         print(f"✓ Overall summary saved to: {summary_file}")
@@ -4656,11 +4662,12 @@ def configuration_gui():
                     write_to_console("⚠️ Final summary generation cancelled by user")
                     return
 
-                model, target_words, context_size = config
+                model, target_words, context_size, include_chars = config
                 write_to_console(f"✓ User confirmed settings:")
                 write_to_console(f"  Model: {model}")
                 write_to_console(f"  Target words: {target_words}")
                 write_to_console(f"  Context size: {'Unlimited' if context_size >= 999999 else f'{context_size:,} tokens'}")
+                write_to_console(f"  Include characters: {'Yes' if include_chars else 'No'}")
                 write_to_console("")
 
                 # Update settings
@@ -4672,7 +4679,8 @@ def configuration_gui():
                 overall_summary = summarizer.create_overall_summary(
                     chunk_summaries,
                     context=None,  # No campaign context available
-                    final_context_size=context_size
+                    final_context_size=context_size,
+                    include_characters=include_chars
                 )
 
                 # Save the summary in the same directory as the JSON file (include model name)
