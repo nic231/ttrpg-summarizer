@@ -490,8 +490,9 @@ class TTRPGSummarizer:
 
         # Filter out hallucinated repetitions from segments
         print("Filtering hallucinated repetitions...")
-        cleaned_segments = self.filter_hallucinations(result["segments"])
-        removed_count = len(result["segments"]) - len(cleaned_segments)
+        raw_segments = result["segments"]  # Keep original segments
+        cleaned_segments = self.filter_hallucinations(raw_segments)
+        removed_count = len(raw_segments) - len(cleaned_segments)
         if removed_count > 0:
             print(f"  Removed {removed_count} repetitive/hallucinated segments")
 
@@ -500,7 +501,8 @@ class TTRPGSummarizer:
 
         transcription_data = {
             "text": cleaned_text,
-            "segments": cleaned_segments,  # Timestamped segments
+            "segments": cleaned_segments,  # Timestamped segments (filtered)
+            "raw_segments": raw_segments,  # Original unfiltered segments
             "language": result["language"],
             "audio_file": audio_file,
             "timestamp": datetime.now().isoformat(),
@@ -2395,13 +2397,14 @@ COMPREHENSIVE SESSION SUMMARY:"""
 
         return overall_summary
 
-    def process_multiple_audio_files(self, file_to_speaker: Dict[str, str], output_dir: str = None) -> Dict:
+    def process_multiple_audio_files(self, file_to_speaker: Dict[str, str], output_dir: str = None, session_name: str = None) -> Dict:
         """
         Process multiple audio files (one per speaker) and merge into single transcript
 
         Args:
             file_to_speaker: Dictionary mapping file paths to speaker names
             output_dir: Directory to save outputs (defaults to DEFAULT_OUTPUT_DIR)
+            session_name: Name for this session (defaults to "multi_file_session")
 
         Returns:
             Dictionary with all outputs
@@ -2412,9 +2415,14 @@ COMPREHENSIVE SESSION SUMMARY:"""
         if output_dir is None:
             output_dir = str(DEFAULT_OUTPUT_DIR)
 
+        # Use default session name if none provided
+        if session_name is None:
+            session_name = "multi_file_session"
+
         print("\n" + BANNER_SINGLE)
         print("MULTI-FILE PROCESSING MODE")
         print("="*60)
+        print(f"Session: {session_name}")
         print(f"Processing {len(file_to_speaker)} audio files...")
         print("="*60 + "\n")
 
@@ -2444,12 +2452,11 @@ COMPREHENSIVE SESSION SUMMARY:"""
 
         timings['transcription'] = time.time() - transcription_start
 
-        # Save individual speaker transcripts (for debugging)
+        # Save individual speaker transcripts (raw + filtered)
         print(f"\n{'='*60}")
         print(f"SAVING INDIVIDUAL TRANSCRIPTS")
         print(f"{'='*60}\n")
 
-        session_name = "multi_file_session"
         # Store session name for character tracking
         self.current_session_name = session_name
         # Ensure base output_dir exists first
@@ -2457,19 +2464,42 @@ COMPREHENSIVE SESSION SUMMARY:"""
         output_path = Path(output_dir) / session_name
         output_path.mkdir(parents=True, exist_ok=True)
 
+        # Create transcripts subdirectory
+        transcripts_dir = output_path / "transcripts"
+        transcripts_dir.mkdir(parents=True, exist_ok=True)
+
         for audio_file, transcript_data in file_transcripts.items():
             speaker = file_to_speaker[audio_file]
-            individual_file = output_path / f"{session_name}_{speaker}_individual.txt"
-            with open(individual_file, 'w', encoding='utf-8') as f:
-                f.write(f"Individual Transcript for {speaker}\n")
+
+            # Save RAW transcript (before hallucination filter)
+            raw_file = transcripts_dir / f"{speaker}_raw.txt"
+            with open(raw_file, 'w', encoding='utf-8') as f:
+                f.write(f"RAW Whisper Transcript for {speaker}\n")
+                f.write(f"(Before hallucination filtering)\n")
+                f.write(f"File: {audio_file}\n")
+                f.write(f"Segments: {len(transcript_data.get('raw_segments', []))}\n")
+                f.write("="*80 + "\n\n")
+                for seg in transcript_data.get('raw_segments', []):
+                    start_ts = format_timestamp(seg['start'])
+                    end_ts = format_timestamp(seg['end'])
+                    f.write(f"[{start_ts} - {end_ts}] {seg['text'].strip()}\n")
+            print(f"✓ Saved RAW transcript for {speaker}: {raw_file.name}")
+
+            # Save FILTERED transcript (after hallucination filter)
+            filtered_file = transcripts_dir / f"{speaker}_filtered.txt"
+            with open(filtered_file, 'w', encoding='utf-8') as f:
+                f.write(f"FILTERED Transcript for {speaker}\n")
+                f.write(f"(After hallucination filtering)\n")
                 f.write(f"File: {audio_file}\n")
                 f.write(f"Segments: {len(transcript_data['segments'])}\n")
+                removed = len(transcript_data.get('raw_segments', [])) - len(transcript_data['segments'])
+                f.write(f"Removed segments: {removed}\n")
                 f.write("="*80 + "\n\n")
                 for seg in transcript_data['segments']:
                     start_ts = format_timestamp(seg['start'])
                     end_ts = format_timestamp(seg['end'])
                     f.write(f"[{start_ts} - {end_ts}] {seg['text'].strip()}\n")
-            print(f"✓ Saved individual transcript for {speaker}: {individual_file}")
+            print(f"✓ Saved FILTERED transcript for {speaker}: {filtered_file.name}")
 
         # Step 2: Merge all transcripts by timestamp
         print(f"\n{'='*60}")
@@ -4554,6 +4584,20 @@ def configuration_gui():
 
                 file_to_speaker = assign_speakers_to_files(audio_files_list)
 
+                # Ask for session name
+                session_name = simpledialog.askstring(
+                    "Session Name",
+                    "Enter a name for this session:",
+                    initialvalue="multi_file_session"
+                )
+                if not session_name:
+                    print("Session name required. Using default: multi_file_session")
+                    session_name = "multi_file_session"
+                # Sanitize session name for filesystem
+                session_name = "".join(c if c.isalnum() or c in (' ', '-', '_') else '_' for c in session_name)
+                session_name = session_name.replace(' ', '_')
+                print(f"Session name: {session_name}\n")
+
                 summarizer = TTRPGSummarizer(
                     whisper_model=whisper_model_var.get(),
                     ollama_model=ollama_chunk_model_var.get(),
@@ -4569,7 +4613,7 @@ def configuration_gui():
                     preconfigured_final_summary=(final_config_mode_var.get() == "now")
                 )
 
-                results = summarizer.process_multiple_audio_files(file_to_speaker)
+                results = summarizer.process_multiple_audio_files(file_to_speaker, session_name=session_name)
 
             else:
                 # Single file processing
