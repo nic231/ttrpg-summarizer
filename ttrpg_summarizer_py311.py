@@ -520,8 +520,8 @@ class TTRPGSummarizer:
 
         This filter catches:
         1. Consecutive identical segments (immediate repetition)
-        2. Short phrases repeated 2+ times in recent history
-        3. Any text appearing 2+ times in last 5 segments
+        2. Longer phrases (5+ words) repeated 2+ times in last 5 segments
+        3. Very short phrases (1-2 words) repeated 3+ times consecutively
 
         Args:
             segments: List of transcription segments
@@ -533,8 +533,9 @@ class TTRPGSummarizer:
             return segments
 
         cleaned = []
-        recent_texts = []  # Track last 5 segments
+        recent_texts = []  # Track last 10 segments
         prev_text = None   # Track immediate previous segment
+        consecutive_count = 0  # Track consecutive identical phrases
 
         for seg in segments:
             text = seg["text"].strip().lower()
@@ -543,30 +544,34 @@ class TTRPGSummarizer:
             if not text or len(text.split()) == 0:
                 continue
 
-            # Check for consecutive identical segments (most obvious hallucination)
+            word_count = len(text.split())
+
+            # Check for consecutive identical segments
             if prev_text and text == prev_text:
-                # Skip this - it's an exact duplicate of the previous segment
-                continue
+                consecutive_count += 1
+                # For very short phrases (1-2 words), allow 2 repetitions (3 total)
+                # For longer phrases, skip immediately on first repeat
+                if word_count <= 2:
+                    if consecutive_count >= 3:
+                        continue  # Skip the 4th+ repetition
+                else:
+                    continue  # Skip any consecutive repeat of 3+ word phrases
+            else:
+                consecutive_count = 1  # Reset counter
 
-            # Check for short phrases (< 5 words) repeated 2+ times in recent history
-            if len(text.split()) < 5:
+            # For longer phrases (5+ words), check if repeated in recent history
+            if word_count >= 5:
                 if recent_texts.count(text) >= 2:
-                    # This short phrase appeared 2+ times recently - likely hallucination
-                    continue
-
-            # Check for any text appearing 2+ times in last 5 segments (lowered from 3)
-            if len(recent_texts) >= 2:
-                if recent_texts.count(text) >= 2:
-                    # This text appeared 2+ times in recent history - likely hallucination
+                    # Longer phrase appeared 2+ times in last 10 segments - likely hallucination
                     continue
 
             # Keep this segment
             cleaned.append(seg)
             prev_text = text
 
-            # Update recent history
+            # Update recent history (increased to 10 segments for better context)
             recent_texts.append(text)
-            if len(recent_texts) > 5:
+            if len(recent_texts) > 10:
                 recent_texts.pop(0)
 
         return cleaned
@@ -2439,6 +2444,33 @@ COMPREHENSIVE SESSION SUMMARY:"""
 
         timings['transcription'] = time.time() - transcription_start
 
+        # Save individual speaker transcripts (for debugging)
+        print(f"\n{'='*60}")
+        print(f"SAVING INDIVIDUAL TRANSCRIPTS")
+        print(f"{'='*60}\n")
+
+        session_name = "multi_file_session"
+        # Store session name for character tracking
+        self.current_session_name = session_name
+        # Ensure base output_dir exists first
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
+        output_path = Path(output_dir) / session_name
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        for audio_file, transcript_data in file_transcripts.items():
+            speaker = file_to_speaker[audio_file]
+            individual_file = output_path / f"{session_name}_{speaker}_individual.txt"
+            with open(individual_file, 'w', encoding='utf-8') as f:
+                f.write(f"Individual Transcript for {speaker}\n")
+                f.write(f"File: {audio_file}\n")
+                f.write(f"Segments: {len(transcript_data['segments'])}\n")
+                f.write("="*80 + "\n\n")
+                for seg in transcript_data['segments']:
+                    start_ts = format_timestamp(seg['start'])
+                    end_ts = format_timestamp(seg['end'])
+                    f.write(f"[{start_ts} - {end_ts}] {seg['text'].strip()}\n")
+            print(f"✓ Saved individual transcript for {speaker}: {individual_file}")
+
         # Step 2: Merge all transcripts by timestamp
         print(f"\n{'='*60}")
         print(f"MERGING TRANSCRIPTS")
@@ -2456,14 +2488,7 @@ COMPREHENSIVE SESSION SUMMARY:"""
         # Combine into full text
         full_text = " ".join(seg["text"].strip() for seg in all_segments)
 
-        # Create output directory
-        session_name = "multi_file_session"
-        # Store session name for character tracking
-        self.current_session_name = session_name
-        # Ensure base output_dir exists first
-        Path(output_dir).mkdir(parents=True, exist_ok=True)
-        output_path = Path(output_dir) / session_name
-        output_path.mkdir(parents=True, exist_ok=True)
+        # Output directory already created above when saving individual transcripts
         print(f"Output directory: {output_path}\n")
 
         # Save raw transcription
