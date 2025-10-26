@@ -39,6 +39,14 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog
 from pyannote.audio import Pipeline
 
+# Try importing faster-whisper for VAD support
+try:
+    from faster_whisper import WhisperModel as FasterWhisperModel
+    FASTER_WHISPER_AVAILABLE = True
+except ImportError:
+    FASTER_WHISPER_AVAILABLE = False
+    print("Warning: faster-whisper not installed. VAD will not be available.")
+
 # Verify CUDA setup at startup
 print(f"Python executable: {sys.executable}")
 print(f"Python version: {sys.version}")
@@ -293,6 +301,9 @@ class TTRPGSummarizer:
         device_name = torch.cuda.get_device_name(0) if self.device == "cuda" else "CPU"
         print(f"Using device: {device_name} ({self.device})")
 
+        # Store model name for faster-whisper fallback
+        self.whisper_model_name = whisper_model
+
         if skip_whisper_load:
             print("Skipping Whisper model loading (JSON-only mode)...")
         else:
@@ -467,15 +478,51 @@ class TTRPGSummarizer:
                 "condition_on_previous_text": False  # Prevent hallucinations from context
             }
 
-            # Note: VAD (Voice Activity Detection) for multi-file mode
-            # The vad_filter parameter is not available in all Whisper versions
-            # Whisper already skips silence efficiently, so this is optional
-            # condition_on_previous_text=False prevents Whisper from hallucinating
-            # repetitive text when encountering silence (like muted microphones)
-            if use_vad:
-                print("  Processing multi-file mode (Whisper auto-skips silence)\n")
-
-            result = self.whisper_model.transcribe(**transcribe_params)
+            # VAD (Voice Activity Detection) for multi-file mode
+            # Use faster-whisper if available for proper VAD support
+            if use_vad and FASTER_WHISPER_AVAILABLE:
+                print("  Using faster-whisper with VAD (silero-vad) to skip muted sections\n")
+                # Use faster-whisper with VAD
+                faster_model = FasterWhisperModel(
+                    self.whisper_model_name,
+                    device="cuda" if self.device == "cuda" else "cpu",
+                    compute_type="float16" if self.device == "cuda" else "int8"
+                )
+                # Transcribe with VAD
+                segments_gen, info = faster_model.transcribe(
+                    audio_path,
+                    language="en",
+                    vad_filter=True,  # Enable VAD
+                    vad_parameters=dict(
+                        min_silence_duration_ms=2000,  # 2 seconds of silence to skip
+                        threshold=0.5  # Sensitivity
+                    ),
+                    condition_on_previous_text=False
+                )
+                # Convert generator to list and format like standard whisper
+                segments_list = list(segments_gen)
+                result = {
+                    "text": " ".join(seg.text for seg in segments_list),
+                    "segments": [
+                        {
+                            "start": seg.start,
+                            "end": seg.end,
+                            "text": seg.text
+                        }
+                        for seg in segments_list
+                    ],
+                    "language": info.language
+                }
+                # Clean up faster-whisper model
+                del faster_model
+                if torch.cuda.is_available():
+                    torch.cuda.empty_cache()
+            else:
+                if use_vad and not FASTER_WHISPER_AVAILABLE:
+                    print("  ⚠️  VAD requested but faster-whisper not available")
+                    print("  Run: pip install faster-whisper")
+                    print("  Falling back to standard Whisper\n")
+                result = self.whisper_model.transcribe(**transcribe_params)
         except Exception as e:
             # Restore stdout before re-raising
             sys.stdout = original_stdout
