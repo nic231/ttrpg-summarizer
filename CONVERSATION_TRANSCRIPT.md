@@ -1108,6 +1108,54 @@ Now let me update the conversation transcript:
 
 ---
 
+**User:** I don't think think the NPC file is helping a lot right now.
+Let's keep building it and refining it, don't feed it back into the chunk prompts.
+Add an option to use it in the final summary.
+
+**Assistant:** Perfect! You're right - feeding the character file back into every chunk summary is probably adding noise and tokens without much benefit. Let me restructure this:
+
+[Creates todo list with 4 tasks: remove from chunks, add GUI option, update final summary logic, commit]
+
+[Makes changes to remove character context from chunk summaries at lines 1513-1514]
+
+Now I'll add a checkbox to the final summary configuration dialog:
+
+[Updates show_final_summary_config return type to include include_characters parameter]
+
+[Adds checkbox to final summary dialog showing character count with default True]
+
+[Updates on_ok function to return include_chars value]
+
+Now I need to update the `create_overall_summary` function to accept and use the parameter:
+
+[Updates function signature to add include_characters: bool = True parameter]
+
+[Updates character context section to only include if include_characters is True at line 2208]
+
+Now updating all three call sites where create_overall_summary is called:
+
+1. Single-file processing (lines 2593-2626)
+2. Multi-file processing (lines 2960-2998)
+3. "Generate from existing chunks" mode (lines 4655-4684)
+
+[Updates all three locations to unpack include_chars from config and pass to create_overall_summary]
+
+Perfect! Now let me commit and push these changes:
+
+[Commits and pushes: "Make character context optional in final summary"]
+
+All done! The changes:
+
+1. **Removed character context from chunk summaries** - Characters are still tracked and saved, just not fed back into every chunk prompt to reduce noise
+
+2. **Added "Include characters" checkbox to final summary dialog** - Shows how many characters are tracked, defaults to checked, user can uncheck to exclude
+
+3. **Updated create_overall_summary() to conditionally include characters** - Only adds the character list if the checkbox is enabled
+
+This gives you control over whether the NPC file helps the final summary while keeping it out of chunk summaries!
+
+---
+
 ## End of Transcript
 
 This transcript captures every message exchanged in this conversation, word for word, exactly as it appeared.
