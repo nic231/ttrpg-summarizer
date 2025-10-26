@@ -8,6 +8,7 @@
 
 # Then install the rest:
 openai-whisper==20231117
+faster-whisper>=1.0.0  # Optional: 4x faster transcription with built-in VAD for multi-file mode
 ollama>=0.1.0
 
 # Speaker Diarization
