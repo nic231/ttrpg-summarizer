@@ -580,7 +580,12 @@ class TTRPGSummarizer:
 
     def convert_to_wav_if_needed(self, audio_file: str) -> tuple[str, bool]:
         """
-        Convert audio file to WAV if it's in an unsupported format (like m4a)
+        Convert audio file to WAV with audio normalization for optimal Whisper transcription
+
+        Applies:
+        - Audio normalization (loudnorm) to boost quiet audio
+        - Converts to 16kHz mono WAV for optimal GPU performance
+        - Normalizes to -16 LUFS (speech standard)
 
         Args:
             audio_file: Path to audio file
@@ -590,8 +595,10 @@ class TTRPGSummarizer:
         """
         file_ext = Path(audio_file).suffix.lower()
 
-        # Always convert to 16kHz mono WAV for optimal GPU performance
-        # WAV = raw PCM data, no decoding overhead = much better GPU utilization
+        # Always convert to 16kHz mono WAV with normalization for optimal GPU performance
+        # - WAV = raw PCM data, no decoding overhead = better GPU utilization
+        # - loudnorm = boosts quiet audio so Whisper can transcribe it properly
+        # - 16kHz = optimal for speech (Whisper's training rate)
         # Exception: Skip conversion if already a 16kHz mono WAV
         if file_ext != '.wav':
             print(f"Converting {file_ext} to 16kHz mono WAV for optimal GPU performance...")
@@ -602,14 +609,20 @@ class TTRPGSummarizer:
             temp_wav.close()
 
             # Use ffmpeg to convert (Whisper already has ffmpeg dependency)
+            # Apply audio normalization to boost quiet audio for better Whisper transcription
             try:
+                # Two-pass normalization:
+                # 1. loudnorm filter analyzes and normalizes volume
+                # 2. Converts to 16kHz mono WAV
                 subprocess.run(
-                    ['ffmpeg', '-i', audio_file, '-ar', '16000', '-ac', '1', '-y', temp_wav_path],
+                    ['ffmpeg', '-i', audio_file,
+                     '-af', 'loudnorm=I=-16:TP=-1.5:LRA=11',  # Normalize to -16 LUFS (speech standard)
+                     '-ar', '16000', '-ac', '1', '-y', temp_wav_path],
                     capture_output=True,
                     text=True,
                     check=True
                 )
-                print(f"✓ Converted to WAV: {temp_wav_path}")
+                print(f"✓ Converted to WAV with audio normalization: {temp_wav_path}")
                 return temp_wav_path, True
             except subprocess.CalledProcessError as e:
                 print(f"Error converting audio: {e.stderr}")
