@@ -4545,6 +4545,7 @@ def configuration_gui():
     stop_event = threading.Event()  # Event to signal stop
     pause_event = threading.Event()  # Event to signal pause
     pause_event.set()  # Start unpaused
+    multi_session_name = [None]  # Store session name for multi-file mode
 
     def run_processing_thread():
         """Background processing thread"""
@@ -4584,18 +4585,10 @@ def configuration_gui():
 
                 file_to_speaker = assign_speakers_to_files(audio_files_list)
 
-                # Ask for session name
-                session_name = simpledialog.askstring(
-                    "Session Name",
-                    "Enter a name for this session:",
-                    initialvalue="multi_file_session"
-                )
+                # Get session name from main thread variable (set before thread started)
+                session_name = multi_session_name[0]
                 if not session_name:
-                    print("Session name required. Using default: multi_file_session")
                     session_name = "multi_file_session"
-                # Sanitize session name for filesystem
-                session_name = "".join(c if c.isalnum() or c in (' ', '-', '_') else '_' for c in session_name)
-                session_name = session_name.replace(' ', '_')
                 print(f"Session name: {session_name}\n")
 
                 summarizer = TTRPGSummarizer(
@@ -4805,6 +4798,27 @@ def configuration_gui():
         import time
         start_time_var[0] = time.time()
         update_runtime()
+
+        # If multi-file mode, ask for session name NOW (before thread starts)
+        audio_files_str = audio_file_var.get()
+        audio_files_list = audio_files_str.split(";") if ";" in audio_files_str else [audio_files_str]
+
+        if len(audio_files_list) > 1:
+            # Multi-file mode - ask for session name
+            session_name = simpledialog.askstring(
+                "Session Name",
+                "Enter a name for this session:",
+                initialvalue="multi_file_session",
+                parent=root
+            )
+            if not session_name:
+                session_name = "multi_file_session"
+            # Sanitize session name for filesystem
+            session_name = "".join(c if c.isalnum() or c in (' ', '-', '_') else '_' for c in session_name)
+            session_name = session_name.replace(' ', '_')
+            multi_session_name[0] = session_name
+        else:
+            multi_session_name[0] = None
 
         # Disable start button during processing
         start_button[0].config(state=tk.DISABLED, text="⏳ Processing...")
