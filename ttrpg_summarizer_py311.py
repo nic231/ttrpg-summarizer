@@ -1571,83 +1571,46 @@ class TTRPGSummarizer:
 
     def split_overlapping_segments(self, segments: List[Dict]) -> List[Dict]:
         """
-        Split long segments where other speakers talk in the middle.
+        Truncate segments when other speakers start talking.
 
-        When Whisper+VAD creates long segments (e.g., 5+ minutes), but other
-        speakers interrupt/overlap, we need to split those long segments to
-        preserve conversation flow.
+        When faster-whisper creates long segments but conversation is taking turns,
+        we truncate each segment at the point where the next different speaker starts.
+
+        This preserves chronological conversation flow.
 
         Args:
             segments: List of segments sorted by start time
 
         Returns:
-            List of segments with overlaps split
+            List of segments with end times adjusted
         """
         if not segments:
             return []
 
-        # For each segment, check if other speakers talk during it
-        split_segments = []
+        result = []
 
         for i, seg in enumerate(segments):
-            current_speaker = seg["speaker"]
-            current_start = seg["start"]
-            current_end = seg["end"]
-            current_text = seg["text"]
+            # Copy segment
+            new_seg = {
+                "speaker": seg["speaker"],
+                "start": seg["start"],
+                "end": seg["end"],
+                "text": seg["text"]
+            }
 
-            # Find all points where other speakers start talking during this segment
-            split_points = []
+            # Look for the next segment from a DIFFERENT speaker
+            for j in range(i + 1, len(segments)):
+                next_seg = segments[j]
+                if next_seg["speaker"] != seg["speaker"]:
+                    # If this next different-speaker segment starts BEFORE our current segment ends,
+                    # truncate our segment to end when they start speaking
+                    if next_seg["start"] < new_seg["end"]:
+                        new_seg["end"] = next_seg["start"]
+                    break  # Only look at the immediate next different speaker
 
-            for j, other_seg in enumerate(segments):
-                if i == j:
-                    continue  # Skip self
+            result.append(new_seg)
 
-                other_speaker = other_seg["speaker"]
-                other_start = other_seg["start"]
-
-                # If another speaker starts talking DURING this segment
-                if (other_speaker != current_speaker and
-                    current_start < other_start < current_end):
-                    split_points.append(other_start)
-
-            # If no overlaps, keep segment as-is
-            if not split_points:
-                split_segments.append(seg)
-                continue
-
-            # Sort split points
-            split_points.sort()
-
-            # Split the segment at each point
-            # (We can't split the text accurately, so just adjust timestamps)
-            # The text stays with the first segment
-            prev_time = current_start
-            for split_time in split_points:
-                # Create segment up to split point
-                split_segments.append({
-                    "speaker": current_speaker,
-                    "start": prev_time,
-                    "end": split_time,
-                    "text": current_text if prev_time == current_start else ""
-                })
-                prev_time = split_time
-
-            # Add final segment
-            if prev_time < current_end:
-                split_segments.append({
-                    "speaker": current_speaker,
-                    "start": prev_time,
-                    "end": current_end,
-                    "text": ""
-                })
-
-        # Re-sort after splitting
-        split_segments.sort(key=lambda x: x["start"])
-
-        # Remove empty segments
-        split_segments = [s for s in split_segments if s["text"].strip()]
-
-        return split_segments
+        return result
 
     def merge_consecutive_speaker_segments(self, segments: List[Dict]) -> List[Dict]:
         """
