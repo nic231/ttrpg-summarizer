@@ -4134,7 +4134,7 @@ def configuration_gui():
                               bg="white", fg="#2c3e50", padx=15, pady=15)
     mode_frame.pack(fill=tk.X, pady=10)
 
-    task_mode_var = tk.StringVar(value="audio")  # "audio" or "existing_chunks"
+    task_mode_var = tk.StringVar(value="audio")  # "audio", "existing_transcript", or "existing_chunks"
 
     def on_mode_change():
         mode = task_mode_var.get()
@@ -4150,6 +4150,19 @@ def configuration_gui():
             char_new_radio.pack(anchor=tk.W, after=char_none_radio)
             char_help_label.config(text="Track characters/NPCs across multiple sessions in a campaign:")
             # file_label will be updated by browse_file
+        elif mode == "existing_transcript":
+            # Transcript mode: Skip transcription, show summarization options
+            section1.pack(fill=tk.X, pady=10)  # File selection (for transcript file)
+            processing_mode_frame.pack_forget()  # No multi-file mode for transcripts
+            section2.pack(fill=tk.X, pady=10)  # Campaign Character File
+            section3.pack_forget()  # Hide Speaker Diarization
+            section4.pack_forget()  # Hide Whisper Model
+            section5.pack(fill=tk.X, pady=10)  # Ollama Models (needed for summarization)
+            # Hide "Create new" option (no character extraction from transcript)
+            char_new_radio.pack_forget()
+            if character_file_mode_var.get() == "new":
+                character_file_mode_var.set("none")
+            char_help_label.config(text="Reference existing campaign character file (optional):")
         else:
             # JSON mode: Hide audio-specific sections but KEEP campaign file (for reference)
             processing_mode_frame.pack_forget()
@@ -4168,6 +4181,13 @@ def configuration_gui():
     tk.Radiobutton(mode_frame, text="Process Audio Files",
                   variable=task_mode_var, value="audio",
                   bg="white", font=("Arial", 10), command=on_mode_change).pack(anchor=tk.W, pady=2)
+
+    tk.Radiobutton(mode_frame, text="Resummarize Existing Transcript",
+                  variable=task_mode_var, value="existing_transcript",
+                  bg="white", font=("Arial", 10), command=on_mode_change).pack(anchor=tk.W, pady=2)
+
+    tk.Label(mode_frame, text="(Use this to re-summarize a transcript without re-running Whisper)",
+            bg="white", font=("Arial", 8), fg="#7f8c8d").pack(anchor=tk.W, padx=20, pady=(0,5))
 
     tk.Radiobutton(mode_frame, text="Generate Final Summary from Existing Chunks",
                   variable=task_mode_var, value="existing_chunks",
@@ -4345,6 +4365,20 @@ def configuration_gui():
                     audio_duration_var.set(0)  # Can't calculate total easily
                     file_label.config(text=f"{num_files} files selected (multi-file mode)")
                     update_time_estimate()
+        elif mode == "existing_transcript":
+            # Browse for transcript text file
+            filename = filedialog.askopenfilename(
+                title="Select Transcript File",
+                filetypes=[
+                    ("Text Files", "*.txt"),
+                    ("All Files", "*.*")
+                ]
+            )
+            if filename:
+                audio_file_var.set(filename)
+                processing_mode_var.set("single")
+                audio_duration_var.set(0)  # No duration for transcript
+                file_label.config(text=f"{Path(filename).name}")
         else:
             # Browse for chunk summary JSON file
             filename = filedialog.askopenfilename(
@@ -4367,8 +4401,11 @@ def configuration_gui():
 
     # Update button text when mode changes
     def update_browse_button():
-        if task_mode_var.get() == "audio":
+        mode = task_mode_var.get()
+        if mode == "audio":
             browse_button.config(text="📁 Browse for Audio File(s)")
+        elif mode == "existing_transcript":
+            browse_button.config(text="📄 Browse for Transcript File")
         else:
             browse_button.config(text="📁 Browse for Chunk Summary JSON")
 

@@ -1,0 +1,561 @@
+FILTERED Transcript for DM
+(After hallucination filtering)
+File: D:/TTRPG Sessions/Heart/Session 2/Flacs/2-scrubbyd.flac
+Segments: 554
+Removed segments: 0
+================================================================================
+
+[0:05 - 0:07] Okay, I'm in the recording.
+[0:07 - 0:11] Alright, so last week when we left off,
+[0:11 - 0:15] we finished up with
+[0:15 - 0:19] the three delvers on the edge of a very
+[0:19 - 0:23] very dangerous descent, cliffhanger if you will.
+[0:23 - 0:27] The descent down
+[0:27 - 0:31] to the Spine of Silence, the picture again
+[0:31 - 0:45] was littered with what looked like religious tokens that have been mounted and secured
+[0:46 - 0:54] to the area surrounding the edge of the descent and possibly from what you could see down
+[0:54 - 1:00] down by your light, also on the way down as you're trying to
+[1:00 - 1:08] ward something nasty away from those that are looking to make the descent.
+[1:08 - 1:10] And I think where we left off,
+[1:11 - 1:14] the three of you were figuring out
+[1:15 - 1:18] how you were going to navigate your way down this descent.
+[1:18 - 1:45] Who was going to go first?
+[1:45 - 1:46] Yeah. So what are you going for here?
+[1:46 - 2:24] going for flavor or mechanics flavors free yeah okay um let's say if you want to um you want to
+[2:26 - 2:33] do something that's going to help you on the way down mechanically we'll make some sort of a check
+[2:33 - 2:42] um i think mend is probably the most appropriate skill uh and i think we're probably still firmly
+[2:42 - 2:56] in the occult domain at this point so uh yeah Arcadia's idea you can take the reins if anyone
+[2:56 - 3:03] wants to chip in with I've got the skill I've got the domain and lend a hand feel free to do so
+[3:05 - 3:31] otherwise you can just throw your body under the bus let Arcadia roll there it is
+[3:31 - 4:02] standard yeah I'll give it to the standard oh that looks pretty good critical success
+[4:03 - 4:10] all right let's say that yeah we're absolutely able to
+[4:11 - 4:22] craft a very convincing and well-received what we call it little effigy or something that will
+[4:22 - 4:31] yeah definitely protect the group on the way down, intention is to make the descent easier.
+[4:31 - 4:52] So definitely any role to get down is going to have mastery and we kind of need a yes and and I
+[4:52 - 5:03] will say the die size can be increased by one step if you successfully make your way down the
+[5:06 - 5:12] down the descent and roll to inflict stress on the delve basically progressed.
+[5:14 - 6:08] The base would be a d4 that'll go up to a d6. All right and while Arcadia is working on
+[6:08 - 6:47] these actions, what are Fessia and Worth working on. You could give me you could
+[6:47 - 7:09] give me a Descend occult check or you could be getting you know gear ready to
+[7:09 - 7:15] Descend down your supplies is a generic catchall, I've got delving equipment. I
+[7:15 - 7:30] don't know if if there's you know any stress inflicted on the way down it's
+[7:30 - 7:38] probably going to be supplies, particularly now given that the protections being put in place by
+[7:38 - 7:46] Arcadia. I'd say it's very unlikely you're going to be beset by anything. It would just be, you know,
+[7:47 - 7:54] bad luck or damaged supplies, one of the two I'd say. So you don't need to mark it to to start,
+[7:54 - 8:07] it's just if something goes wrong. Yeah okay, so let's say narratively that you guys are getting
+[8:07 - 8:17] ready to make your way down, you know, tying off ropes, peatons, however you want to say it,
+[8:17 - 8:25] that sort of that sort of deal. And yeah I think unless anybody has a different idea of
+[8:26 - 8:33] how you see your characters moving down, a delve check would be appropriate. That's your
+[8:33 - 8:44] of catch-all movement exploration skill and yeah I'd say we're still in a cult at the moment but
+[8:44 - 8:50] yeah if you've got another awesome idea with abilities or some other creative skill use
+[8:52 - 9:36] ready to hear it. My preference is just say it in a way that sounds the funniest that's why I like
+[9:36 - 9:49] ETOMs. Pretty sure it's not that kind of music. They kind of do. Like as the, I imagine that
+[9:49 - 9:57] this rope and you've got like a you know a lantern tied onto it, an oil lantern lowering it down over
+[9:57 - 10:03] the edge and you can see it's like much the same on the way down as far as you can see. There's more
+[10:03 - 10:15] more religious tokens affixed to the face of the descent.
+[10:15 - 10:19] You can see bits of left behind climbing gear, there's bits of rope.
+[10:19 - 10:29] There's evidence of some sections apparently having failed and fallen off,
+[10:29 - 10:34] damage left behind to the wall.
+[10:34 - 10:40] It's pretty much the same as far down as you're prepared to let that lantern go.
+[10:40 - 10:44] You don't see any other signs of life on the way down.
+[10:44 - 10:47] It's pretty quiet.
+[10:47 - 10:48] There's a bit of a...
+[10:50 - 10:53] Not, you know, dangerous, but there is a bit of a wind
+[10:54 - 11:00] that you can see sort of causing the rope to sway weighted by the lantern at the end of it.
+[11:01 - 11:02] Occasionally there's a bit of a gust
+[11:02 - 12:33] it gives a bit of a sway from side to side. Let me just have a quick look at this. Yeah all right
+[12:33 - 12:55] let's just go for a um delve occult rolled with mastery. Let's have a look here let's make it um
+[12:55 - 13:53] let's make it risky it's not gonna be not gonna be good if you fall off. No all right that's a clean
+[13:53 - 14:53] success cost mastery I think the odds are in your favor okay yeah well I mean
+[14:53 - 15:00] it's a success so let's get the let's get the stress rolled first it'll be a
+[15:00 - 15:19] d6 and we will put this one against supplies easy peasy pretty sure that you
+[15:19 - 15:24] won't figure all out at this point because you've only got two stress I
+[15:24 - 15:33] I think I know but one last room yeah must have one from let's have one from the previous session
+[15:33 - 15:40] um okay so let's get you to hit that little uh uh fallout button
+[15:43 - 15:54] let's just hit the button and it'll it'll roll it okay so now uh I didn't expect we were going
+[15:54 - 16:01] going to hit fallout quite so early. Okay that's good so what we're gonna do
+[16:01 - 16:23] this is the first time we get to go through it. So because you've taken
+[16:23 - 16:31] you're gonna take a minor fallout I think you remove all of the stress from
+[16:31 - 16:37] supplies which was the stress that was just hit. That makes sense?
+[16:37 - 16:55] uh yep so if it was major fallout i think that clears all the stress on the character sheet but
+[16:56 - 17:07] minor fallout will just clear um the stress that was just triggered makes sense yep okay uh let's
+[17:07 - 17:18] see here so you're able to make your way down there might be like a bit of a um a bit of a
+[17:18 - 17:28] a precarious moment where the gust hits as you're going down first, as you are, and there's a little
+[17:28 - 17:35] bit of a sway in the rope section that you're hanging off the plane yourself and the last piton
+[17:36 - 17:46] in the wall. I'm testing out Link's AI by submitting it that way. But it settles down and you're able
+[17:46 - 17:55] to continue the descent down, eventually reach the bottom. Unfortunately the line that you have
+[17:57 - 18:04] also dangling down a little bit ahead of you with that lantern lighting the way in the gust,
+[18:04 - 18:14] it actually gives way and snaps and it will fall down to the bottom and it's going to
+[18:16 - 18:23] land on the ground and snuff itself out. You have to make the rest of the
+[18:23 - 18:29] descent down in the dark but you're able to, with a little bit of care, get to the
+[18:29 - 18:37] bottom and find that the lantern isn't destroyed or damaged but it's sort of
+[18:37 - 18:48] tipped over and the oil's run out of it. So you will take the fallout darkness, your
+[18:48 - 18:57] supplies of Spire Black oil run low. All Delve or discern checks you make
+[18:57 - 19:07] become risky. Another party member can remove this stress by marking, remove the
+[19:07 - 19:09] to fall out by marking D6 stress to supplies,
+[19:09 - 19:13] to share some with you.
+[19:13 - 19:15] So you've still got enough...
+[19:17 - 19:19] ..enough in there to light it back up,
+[19:19 - 19:21] but it's barely enough,
+[19:21 - 19:24] and the light that's getting off is pretty weak.
+[19:26 - 19:31] In that light, the others are able to make their way down.
+[19:31 - 19:35] And if you want to make your gear with you as you go,
+[19:35 - 19:36] you're able to do that.
+[19:36 - 19:39] there's no further complications
+[19:39 - 19:42] with any of your equipment on the way down.
+[19:44 - 19:47] Last thing I'll get you to do before I give it back to you
+[19:47 - 19:50] is I'll get you to roll a D6.
+[19:51 - 19:55] Typically would have been a D4, but we move up a step.
+[19:55 - 19:58] All that critical success previously,
+[19:58 - 20:01] and we'll inflict some stress on the delve.
+[20:01 - 20:08] Pick the clock.
+[20:08 - 20:13] Nice.
+[20:13 - 20:14] All right.
+[20:15 - 21:42] Okay.
+[21:42 - 22:17] absolutely this is not quiet not quiet Nick why don't you give me another d6
+[22:17 - 22:40] buddy yeah I did let me see here it might be okay I can't remember if it's
+[22:40 - 22:56] uh roll under or speed speeds where's the cheat sheet uh stress fallout nope okay
+[22:58 - 23:09] it's meant to be a d12 actually so let's get you to yeah roll it again
+[23:10 - 23:19] um the fallout we've inflicted on this year is pretty low stakes so we'll just leave it at that
+[23:19 - 23:29] okay same result yep if the result is equal to or lower than your total stress you suffer fallout
+[23:30 - 23:36] okay so nick is also going to suffer fallout so you can clear all of that right back off
+[23:37 - 23:50] and let me have a look here and we'll see what it's gonna be yeah i think it's best if we don't
+[23:50 - 23:55] random it i mean you can press the button and see what happens it's probably just the one to remove
+[23:55 - 24:05] you stress automatically yeah i just worry about random fallouts being weird and fitting in the
+[24:05 - 24:17] narrative just hit the button so we can test the system and see what happens yeah yeah no that's
+[24:17 - 24:21] just actually doing a fallout roll so that's probably the button that we want to use rather
+[24:21 - 24:36] than straight rolling a d12 next time okay major supplies yeah well he was uh six he went straight
+[24:36 - 24:48] to six stress right he rolled a d6 to fix your fallout and um got a six no you're right sorry
+[24:48 - 25:00] it is a minor why was the character sheet misled me one two three four five i don't know why they've
+[25:00 - 25:09] put five pips per column it would be more sensible to me if it was six pips per column because i just
+[25:09 - 25:14] saw he was one pip into the second column I thought oh okay that's a major.
+[25:14 - 25:17] All right so we will go back down to okay let's uh
+[25:17 - 25:21] let's just do the same thing and say that um
+[25:21 - 25:28] Worth you know pulls out his lantern from his pack and finds that
+[25:28 - 25:35] he actually forgot to resupply on oil. So you guys are dangerously
+[25:35 - 25:55] load on oil now. I'm going to drag that in your sheet. Arcadia comes down last I'm going to say
+[25:55 - 26:04] and comes across the two of you trying to figure out this lantern situation just as
+[26:04 - 27:24] worth realises that it's actually lacking. If you find these two, yeah there's a pair of bodies.
+[27:24 - 27:32] probably as you're scanning the surrounding area you see like at the edge of the dim lamplight you
+[27:32 - 27:39] can just make out a pair of legs that lead off into the darkness and a close inspection reveals
+[27:39 - 27:45] that there are in fact two legs because I rolled the two no that's not right there's two bodies
+[27:45 - 27:57] flying. No there are there are two bodies and they are most definitely no longer
+[27:57 - 28:09] living and you can see that they have definitely suffered some pretty
+[28:09 - 28:17] catastrophic breaks and prac skull you can see fulls of dried blood on the
+[28:17 - 28:29] ground underneath them. Let's say they look like they've probably been they
+[28:29 - 28:37] not starting to like decompose or anything but they don't look like they
+[28:37 - 29:22] just died today. They've probably been there for let's say a few days. Yeah
+[29:22 - 29:30] I'm gonna say that you don't find like too much there that's particularly
+[29:30 - 29:38] interesting to you, but you feel something like you reach into one of the pockets
+[29:38 - 29:49] rifling through, not over like pretty much anything that these two might have to
+[29:49 - 29:52] offer and you kind of get the impression they might have already been picked clean
+[29:52 - 29:58] but as you reach into one of their pockets and you're ratting around you feel something in your hand and it sends a bit of a
+[29:58 - 30:02] not a physical jolt through you, but like a um, I
+[30:02 - 30:06] Don't know like maybe a spiritual jolt you feel this is something
+[30:09 - 30:10] remarkable and
+[30:10 - 30:12] You pull it out
+[30:12 - 30:20] You open your hand. You've got this small object in your hand and you can't your mind struggles to grasp
+[30:21 - 30:23] Exactly what this is
+[30:24 - 30:39] but the best that we can gather as viewers if it's possible is that this is a dice that is a d3
+[30:41 - 30:53] somehow you're holding a three-sided polyhedral dice i will drag this onto your sheet it's a
+[30:53 - 31:02] resource that is worth a d4. Unwrap your head around that.
+[31:02 - 32:39] It has the cursed and haven domains. I'm just thinking if there's a way I can
+[32:39 - 32:46] make this interesting at this early stage of the delve
+[32:46 - 32:50] without saying go back to where you just came from.
+[32:50 - 33:07] it's like silence is close yeah let me have a look um no i'm looking at the wrong thing that's
+[33:07 - 33:26] character sheet let's just say that um you feel it feel that that sense of value
+[33:28 - 33:37] pulling you uh pulling you deeper into the delve um you feel that not too far away
+[33:38 - 33:50] There are a number of items that may be salvaged, scavenged, liberated.
+[33:50 - 33:57] It's not a particularly, you're not getting a sense of particularly high value, but you
+[33:57 - 35:00] are getting a sense of abundance, if that makes sense.
+[35:00 - 35:10] you're finishing your explanation. One thing that you perhaps keep to yourself worth. The last
+[35:10 - 35:26] note that you get is a distinct one that you feel almost empathetically it's that strong.
+[35:26 - 35:54] it's desperation. Everybody sees worth like pep-hop a bit, he's excited. A quick
+[35:54 - 36:04] consultation with the mud map that Larissa has sketched in Dessia's book by
+[36:04 - 36:09] by the dull light of a lantern that you've got going,
+[36:11 - 36:13] kind of points you onwards.
+[36:15 - 36:18] You've made your way down the descent
+[36:18 - 36:23] and the sign of silence lies not too far ahead now,
+[36:26 - 36:30] confident that it's probably only gonna be a short walk
+[36:30 - 36:34] to make your way there.
+[36:34 - 36:38] It's really reaching the point where you're not to commit
+[36:38 - 36:43] to locking in and pushing on
+[36:47 - 36:51] before you reach a point where it's almost gonna be
+[36:53 - 36:58] just as difficult to return as it would be to continue
+[36:58 - 39:27] reaching the point of no return, at least for this trip.
+[39:27 - 39:31] Yeah, getting able to scrap together some bits and pieces
+[39:31 - 39:33] that look like they'll be useful.
+[39:33 - 39:41] um that's completely fine. Mechanically what you can do in this sort of a situation,
+[39:41 - 39:50] which isn't really going to help now, but if you did have an accumulation of supplies stress,
+[39:52 - 40:02] you could actually make a check to try and scavenge some bits and pieces together.
+[40:02 - 40:09] you make a delve check to un-recover some stress. I think everyone's pretty fresh in that department
+[40:09 - 40:22] at the moment courtesy of the oil windowing. It's great. Move the group along a little bit
+[40:24 - 40:41] as you head further away from the descent so that the space converges back
+[40:41 - 40:49] to the other one of the many forgotten maintenance tunnels underneath the city.
+[40:50 - 41:01] It's entirely derelict decrepit, broken stone, there's pools of water on the floor,
+[41:02 - 41:10] the flight of your lantern sort of bounces off, it's pretty dank, but eventually what you note
+[41:10 - 41:20] is that the corridors begin to give way to tunnels that are sort of ossified
+[41:21 - 41:35] turning into some sort of bone. Very curious transitions, so gradual that it seems seamless
+[41:35 - 41:46] by the time you realize it's happening it's already happened and uh say that who's who's
+[41:46 - 41:54] taking that I think we had Thessia taking the lead and you notice it and go to put a hand
+[41:57 - 42:06] to feel the new surface it definitely feels like bone and old bone as you run your hand over it
+[42:06 - 42:16] you feel something in the bone. You hold the lantern a little bit closer and you can see that
+[42:17 - 42:29] it looks like somebody else that's passed through this way recently or probably not recently at all
+[42:29 - 42:35] I suppose, scratched, carved a
+[42:35 - 42:45] message into the wall is to be a warning of uh
+[42:45 - 42:49] I guess your typical uh soulsborne message
+[42:49 - 42:55] that someone's left for you. Not direct, somewhat cryptic.
+[42:55 - 43:23] Simply says silence is golden. Silence. I'm getting lured into my own
+[43:23 - 43:27] i'm getting lured in myself like my voice is getting lower and lower as i'm leaning into it
+[43:27 - 44:30] i need to speak up sorry guys at the moment it feels like the whole surface is blown yeah yeah
+[44:30 - 45:16] taken a knife and just carved it right in there as you're looking at the inscription on the wall you
+[45:16 - 45:35] see more words starting to appear. It's like they're an invisible force scratching more
+[45:35 - 45:48] ladders into the bone. It's a very violent display, the way these ladders are materialising, as if
+[45:48 - 46:01] whatever's doing it is very aggressively typing these letters. The words begin to
+[46:01 - 46:32] appear before you are of perspective. As you stand there, is it making any noise? No. No.
+[46:32 - 46:36] No. It's not making any noise and you stand there like pondering like what is
+[46:36 - 46:48] is happening probably filling you with some sense of surprise at least um shock maybe a tinge of
+[46:48 - 46:58] dread you'd heard something about this and as you're standing there for the moment not sure
+[46:58 - 47:10] what to do happens again let us begin being scratched out aggressively slowly at first one
+[47:11 - 47:13] two
+[47:13 - 47:16] And then in a rush three four five and the letters
+[47:18 - 47:20] Read
+[47:20 - 47:52] Leaves go up, roots go down. Yeah as you do that
+[47:55 - 47:57] Very quickly again
+[48:00 - 48:05] The inscription starts up and this is starting to go more quickly now and
+[48:07 - 48:11] There's quite a bit more
+[48:11 - 48:21] it's being composed this time. Previously it was just a sentence on its own, now it's
+[48:21 - 48:28] prose entirely. And as this is happening in front of you, you recognize what you're seeing on KDR.
+[48:29 - 48:40] It is basically a copy of one of the letters that you have in the old possession.
+[48:45 - 48:51] While you have your hand held on the wall, it is reproducing this letter.
+[48:51 - 50:08] When it reaches...
+[50:08 - 50:10] That boo keeps getting me.
+[50:10 - 50:13] When it reaches the... Oh god.
+[50:13 - 50:14] Oh.
+[50:14 - 50:19] Okay, I'm writing that down, Nick.
+[50:19 - 50:21] That's maybe gonna happen.
+[50:21 - 50:25] When it reaches the end of the letter,
+[50:25 - 50:39] It starts writing a reply to the letter.
+[50:39 - 50:48] This is all, you know, reasonably well spaced, so it's pretty clear that one letter ends and another one starts.
+[50:48 - 51:10] And what you see is that this letter is being written by what you can only assume to be yourself, Xavier, writing back about your life in silence.
+[51:10 - 51:21] You're writing to regretfully explain that you're sorry but you can't leave.
+[51:21 - 51:31] Your life is in silence now, must I? You can never leave silence.
+[51:31 - 51:41] This letter continues composing. It's picking up speed pretty quickly.
+[51:41 - 51:51] And you feel all starting to impose itself on you.
+[51:51 - 52:01] You're like, you need to go back and you need to go back and write this letter.
+[52:01 - 53:07] Okay, so what is happening is the force that has basically taken Larissa out
+[53:07 - 53:14] of the out of commission is imposing itself on you now. If you want to
+[53:14 - 53:23] continue to observe it and see what happens without falling victim to it I'm
+[53:23 - 53:28] I'm gonna need you to give me an endure occult check.
+[53:57 - 55:04] That's been chewed off standard.
+[55:04 - 55:07] Yeah, okay, so you wanna interfere with what's happening.
+[55:08 - 56:30] How are we, yep.
+[56:30 - 56:32] Let's resolve what Arkady is doing
+[56:32 - 56:34] and if something bad happens,
+[56:34 - 56:45] we'll jump over to the two of you trying to pull her away.
+[56:45 - 56:47] Success at a cost.
+[56:47 - 56:49] Let's get a stress roll.
+[56:49 - 57:00] going to be D6 to mind. So you can just take the little dice next to the... yeah you got it.
+[57:39 - 57:47] All right so if you just click the little heart to apply that. I think were you using your ability to
+[57:49 - 57:56] add an extra resistance? The implacable... had you already done that or not? Like could have been
+[57:56 - 58:07] one or two resistance okay all right okay let's hit the um fall out button
+[58:08 - 58:12] you've got like a one in twelve chance of fall out i think you'll be right yep okay we're good
+[58:15 - 58:29] no fallout all right you are able to enjoy this as the um the ladder continues composing itself
+[58:29 - 58:44] you can sense whatever is doing this. There is like a tangible feeling of frustration that begins
+[58:44 - 58:55] to thrum around you as if it can tell it's not what it's not able to overwhelm you and and take
+[58:55 - 59:05] control in the way it's been able to with others. It will start to very angrily cross out
+[59:06 - 59:21] the lines of prose that make up the reply and then instead it starts writing, it starts writing
+[59:21 - 59:35] your dream. It starts writing about the upside down tree. It starts writing about the butcher
+[59:35 - 59:56] bird. This version of your dream goes a little bit deeper than usual. It writes that this
+[59:56 - 1:00:12] bird's ladder is well stopped and explains that there are many bodies impaled in the area
+[1:00:12 - 1:00:26] surrounding the upside down tree. I'm going to get you to roll me a d4.
+[1:00:28 - 1:01:06] We'll inflict some stress on this delve because you did pass that check. Yeah two of you standing
+[1:01:06 - 1:01:14] there getting like increasingly concerned about the apparent hold this phenomenon has over
+[1:01:14 - 1:01:22] Arcadia. On the verge of stepping in and trying to like physically pull her away from the wall
+[1:01:22 - 1:01:32] suddenly gasps and pulls her own hand back and the text stops, slows to a stop and
+[1:01:32 - 1:01:45] And text that is on the wall begins to not quite fade, but like almost age rapidly before your eyes.
+[1:01:45 - 1:01:58] It is effectively fading from existence, but in a way that you would see normally with passage of time over years or decades,
+[1:01:58 - 1:04:17] it's happening very quickly in front of you.
+[1:04:17 - 1:04:28] Alright, are the three of you ready to move on towards the Horde?
+[1:04:28 - 1:06:01] Anybody else want to play with the call?
+[1:06:01 - 1:06:09] Show me Nicole, would it have been in the letter, like named directly or you know, some
+[1:06:09 - 1:09:08] Yes, yep, it's getting warmer, definitely getting warmer as you proceed further down the path.
+[1:09:15 - 1:09:54] Yep, yep, yep. I think it was, if I may have narrated it incorrectly, it was
+[1:09:54 - 1:10:34] Because, exactly, leaves go down, roots go up.
+[1:10:34 - 1:10:44] So tell me that, your recollection is Arcadia were saying, roots go down, leaves go up,
+[1:10:44 - 1:10:48] to re-center yourself basically on what is correct.
+[1:10:48 - 1:10:55] Okay, roots go down, leaves go up.
+[1:10:55 - 1:11:08] important. Okay, so assuming that everybody has finished this interaction and no one else wants to
+[1:11:09 - 1:11:15] play around with the wall, I'm going to move things along again. Nothing
+[1:11:19 - 1:11:28] interesting is going to happen at this part of the tunnels, unless you want to get involved with it.
+[1:11:28 - 1:11:39] So you continue further along these ossified tunnels. Those bones that you are curious about,
+[1:11:40 - 1:11:53] the wall of bone, as you're walking along you realise that the solid wall has given way to
+[1:11:53 - 1:12:09] it's like a inner mitten evenly spaced arches that you're walking through at
+[1:12:09 - 1:12:21] this point, arches being inverse, so the path that you're walking from has half
+[1:12:21 - 1:12:26] the arch raising from the ground to your left and the other half raising from the
+[1:12:26 - 1:12:35] ground to the right. It's given way to what appears to be a very very large rib
+[1:12:35 - 1:12:43] cage. You find yourself walking in that dim light from your lantern through what
+[1:12:43 - 1:12:54] appears to be a large rib cage walking along a spine. This is the true spine of
+[1:12:54 - 1:13:01] silence that you're walking along now and as you're making your way through
+[1:13:01 - 1:13:08] the bloom you hear a curious sound
+[1:13:08 - 1:13:21] up ahead you hear Arcadia say in a very matter of fact way
+[1:13:21 - 1:14:15] roots go down leaves go up once that's it then it's quiet
+[1:14:15 - 1:14:26] as you do I'd say like further ahead in the like basically your light only stretches so far
+[1:14:28 - 1:14:32] you can't see where it's come from but you can tell it's coming from ahead
+[1:14:32 - 1:14:38] and I guess off to the left of the rib cage
+[1:14:41 - 1:14:47] if you you know in front of you was north it'd probably be like a northeast lolly direction
+[1:14:47 - 1:15:29] direction, sorry, northwesterly direction, the other left.
+[1:15:29 - 1:15:36] On the back of that, you hear from the same direction, worth, ads.
+[1:15:36 - 1:16:29] It's all a matter of perspective.
+[1:16:29 - 1:16:46] Use your likeliness without permission, hard to say.
+[1:16:46 - 1:17:05] It's very, it's, it's very big and it's going to probably continue for some time.
+[1:17:05 - 1:17:13] Let's say at this point it's you're feeling a shift in the air.
+[1:17:13 - 1:17:22] Let's say we'd be heading into the cursed end of the delve, probably about the halfway
+[1:17:22 - 1:17:23] point.
+[1:17:23 - 1:18:19] So a bit of both but you're starting to feel a turn.
+[1:18:19 - 1:19:09] say it looks like it's like a hydro sized snake. Snakes are cool. Yes, it's just a
+[1:19:09 - 1:19:15] real big snake. Things don't have to make sense down here. You will probably never
+[1:19:15 - 1:19:22] see something like this again anywhere in the heart or in your life. It might
+[1:19:22 - 1:19:30] not have even come from this plane of existence. It's just here. There's
+[1:19:30 - 1:19:54] not necessarily a Y, there just is. From the same direction you hear a CSA.
+[1:19:54 - 1:20:41] I could really go for some acorns. Yes.
+[1:20:41 - 1:22:04] Yep. So going further to check out where this sound is coming from, you progress
+[1:22:04 - 1:22:14] further along this giant rib cage and by your estimation the direction that this sound is coming
+[1:22:14 - 1:22:24] from as you proceed now is probably somewhere out to your left. So I'm gonna say that Bessie has
+[1:22:24 - 1:22:36] got a hand on one of these giant ridge bones, sort of like just half holding it, half just
+[1:22:36 - 1:22:46] resting a hand there, and leans out from the ribcage.
+[1:22:46 - 1:22:52] It's a vast space outside the bones.
+[1:22:52 - 1:22:56] And you hold the lantern for the dim light that it gives off.
+[1:22:56 - 1:23:09] You can see there's more bones beyond the rib cage sort of erupting from the ground
+[1:23:09 - 1:23:23] something has metastasized out of the earth. They're like almost massive stalagmites,
+[1:23:23 - 1:23:34] but they're bone. Quite long, sharp points, wicked at the end of them. And as the light
+[1:23:34 - 1:23:41] sort of gives you some sense of what's out there and you're taking in the
+[1:23:41 - 1:23:51] surroundings. On one of the one of the bony eruptions at the top you see there
+[1:23:51 - 1:24:05] something hanging, sprawling from the tip and the spike. You think maybe it could
+[1:24:05 - 1:24:15] be a body you can like think you can see a couple of limbs and you continue scanning the area
+[1:24:17 - 1:24:29] there is a spot where the bones thin and in this clearing you can just make out
+[1:24:29 - 1:24:44] a large tree, ash white in this clearing of bones. Your eyes run off the trunk and
+[1:24:44 - 1:24:54] you realize that the tree is not right, it's wrong. At the top of the tree you see where
+[1:24:54 - 1:25:08] branches should be a mess of roots and sitting top that tree there is a very
+[1:25:08 - 1:25:25] large bird thing is say at least three times the size of either of you and it's
+[1:25:25 - 1:25:33] facing away from you you can hear it like softly nattering. Occasionally you
+[1:25:33 - 1:25:46] make out what seems to be strings of speech. It looks like it's looking for
+[1:25:46 - 1:25:54] something. You can see it's sort of head turning occasionally as if it senses
+[1:25:54 - 1:26:02] there's something out there somewhere. Something's given itself away and it's
+[1:26:02 - 1:26:14] head turns towards where you stand with your spluttering lantern and as it does you see that
+[1:26:17 - 1:26:32] it's only half fleshed on that side of its face. There's ragged openings in the side of its face,
+[1:26:32 - 1:26:42] you can see bone through it and as you take in more of the bird you can see that it's
+[1:26:43 - 1:26:55] much the same across all of its body. Half flesh, half skeletal. This thing is disgusting.
+[1:26:57 - 1:27:03] And its head tilts a little bit to the side as it looks at you.
+[1:27:05 - 1:27:52] you know straight away that it's seen you it knows where you are hasn't moved yet yes
+[1:27:53 - 1:28:41] first it heard you and now it's seen you it says in your voice fruits go down leaves go up
+[1:28:44 - 1:29:33] and you can see it gather itself some tension coiling in it it says in Asiya's voice
+[1:29:33 - 1:29:51] I could really go for some acorns and you see its legs stiffen as it is getting ready to leave
+[1:29:51 - 1:30:25] the tree. Yeah as that click rings out this thing is going to give a deafening shriek. That volume
+[1:30:25 - 1:30:32] that hurts your ears and it's gonna take flight and start heading in your
+[1:30:32 - 1:30:45] direction and I found a nice little artist impression of our friend looks
+[1:30:45 - 1:31:50] like this guy it is coming right for you I like it okay well let's let's uh let's
+[1:31:50 - 1:31:59] let's start putting this scene together how it's playing out. So the bird is
+[1:31:59 - 1:32:05] going to give a shriek and take flight and start swooping towards the three of
+[1:32:05 - 1:32:22] you. Does Worth shoot pretty much straight away or does this happen? Let me just have a
+[1:32:22 - 1:32:30] quick look here. Yeah I'm gonna say like I'm not gonna make it be like
+[1:32:30 - 1:32:37] extreme range. We're gonna say ranged is fine and effective. So let's have
+[1:32:37 - 1:32:43] Wirth shoot first. There's gonna be fight, sorry kill in this system, not fight,
+[1:32:43 - 1:32:52] and occult or cursed. That's just for this great role if you've got anything
+[1:32:52 - 1:32:55] else you want to use on your sheet that's like I can do this awesome thing
+[1:32:55 - 1:33:27] can go for it. Yes. Hang on, wait up. You have a fallout. Yeah, yeah, you're right,
+[1:33:27 - 1:33:42] you're right. Yep, all good. Oh, that looks good. So let's get some damage. Your weapon
+[1:33:42 - 1:34:09] does a d6, I believe. Is that right? No, d8. Very nice. It's not too expensive yet.
+[1:34:09 - 1:34:16] Yeah there's lots of tags like that that do different if you roll mats you take
+[1:34:16 - 1:34:25] some kind of stress. Alright yeah that shot goes off and I'm gonna say like it
+[1:34:25 - 1:34:31] you can see like a spurt come out of this thing's mess of a chest where the
+[1:34:31 - 1:34:40] bullet lands but it continues charging down towards the three of you it's seen
+[1:34:40 - 1:35:04] Emil yeah perfect okay that's gonna make things interesting all right yep and it
+[1:35:04 - 1:35:11] is screaming down the gun has gone off behind Arcadia I imagine at that point
+[1:35:11 - 1:36:40] you will uh be changing oh okay let's yep getting in nice and close uh let's say it's going to be
+[1:36:41 - 1:36:53] risky and yeah it's just going to be your straight up again kill cult or cursed
+[1:36:54 - 1:36:58] if uh you just want to go toe to toe with this thing but yeah absolutely be risky
+[1:36:58 - 1:37:32] into getting close with it really that does not seem right to me yeah it should only take away
+[1:37:32 - 1:37:41] uh yeah okay sorry yeah the two is lower my bad okay uh this thing is um
+[1:37:43 - 1:37:53] it's going to loop in and it's not really um put off at all by this front you've put on arcadia
+[1:37:53 - 1:38:36] you'll take d6 stress to fortune on that one. Yep, let's hit it. Ah, you're safe. Boo! Okay,
+[1:38:40 - 1:38:51] yeah, so this butcher bird has swooped down and basically tried to
+[1:38:51 - 1:39:02] to grab Arcadia, who's charged out and assumed this horrifying visage.
+[1:39:02 - 1:39:06] At this point, Asir, do you want to get involved?
+[1:39:06 - 1:39:54] No, you're not a threat at the moment.
+[1:39:54 - 1:40:02] Okay, while you're trying to figure that out, I'm going to say that this, like, there's
+[1:40:02 - 1:40:08] bit of a scrabbling melee going on at the moment. So Acadia is trying to like fight this butcher
+[1:40:08 - 1:40:20] bird off and it's trying to grab you. It's like that really bothersome interaction you have when
+[1:40:20 - 1:40:26] you've got a bird like flapping right near your face but this thing is huge. I want to like just
+[1:40:27 - 1:40:30] play this out a little bit more because it's happening like right in front of us.
+[1:40:30 - 1:40:49] what do you want to do Nicole? yep yep let's get let's get another one if you want yeah yeah
+[1:40:49 - 1:41:32] that's cool might be lucky oh that looks pretty good let's see here so you might have picked
+[1:41:32 - 1:41:46] cursed oh that's a good question base cursed mastery based compel yeah that's okay it would
+[1:41:46 - 1:41:53] have yeah I mean you got a nine with your base anyway so you're all good all right let's get
+[1:41:53 - 1:42:06] your damage. Bloodbound gives you mastery for the situation if you want it but you have to like
+[1:42:08 - 1:42:26] you gotta hurt yourself to do it yeah yep all right yeah you're able to like sort of
+[1:42:27 - 1:42:34] ran this blade into the side of its midsection but it doesn't really seem to be too bothered by it
+[1:42:34 - 1:42:40] So at this point I'm going to go back to either Worth or Fessy or who's jumping in.
+[1:43:19 - 1:43:41] All right same again, kill, occult or cursed. Okay that's another good one, got lots of it,
+[1:43:41 - 1:44:00] yep let's get some damage. Yeah this one, this one takes the bird being in the head and it does seem
+[1:44:00 - 1:44:08] to like flinch back a bit or perhaps it's just driven by the force of the bullet but it does
+[1:44:08 - 1:44:26] resume its efforts to try and scoop up Arcadia so that it can leave with its snack. It's a
+[1:44:26 - 1:44:56] initiative at this point if you want to do anything otherwise we'll jump back to Arcadia.
+[1:44:56 - 1:45:03] i mean it could be like i don't think it's like a i don't think it's a weapon i think it's a like
+[1:45:03 - 1:45:11] mundane tool that you are weaponizing that's what i imagine oh yeah yeah yeah like i mean you can
+[1:45:11 - 1:45:16] absolutely use that to damage or you can like send some bees after it whatever you uh whatever
+[1:45:16 - 1:46:33] you want to do definitely i don't like it uh yeah if you're getting in close yeah it will be
+[1:46:33 - 1:46:39] so your other option if you want to like change tactics if you use your beans you
+[1:46:39 - 1:47:37] don't have to get in close oh yes yes yes gotcha yep different situation let's
+[1:47:37 - 1:47:59] get I'll just make this one a d4 let's do echo this is this is a cursed location
+[1:47:59 - 1:48:11] and you're doing magic-y stuff so I think echo is appropriate all right
+[1:48:11 - 1:48:18] That's gonna be a minor fallout for echo. Let me see what I can find here. This is good. We're getting into the system
+[1:48:19 - 1:48:34] Let's see, it's one that I like I just need to see
+[1:48:35 - 1:48:49] Maybe it's not echo. It's no it's mind that I was thinking of. Okay
+[1:48:59 - 1:49:01] something
+[1:49:02 - 1:49:07] Think strange happens as you make this
+[1:49:07 - 1:49:24] incantation, try to place it on your hive tool. Sorry, I had Arcadia selected. It's disappeared,
+[1:49:24 - 1:49:33] suddenly. One moment Arcadia is there, sorry Thassie is there,
+[1:49:33 - 1:49:44] So we might see out of his periphery as he's trying to draw a bead on another shot that's
+[1:49:44 - 1:49:53] not going to hit Arcadia, I see it pulls out this strange looking tool and begins muttering
+[1:49:53 - 1:49:57] to herself and then she's just not there anymore.
+[1:49:57 - 1:50:11] There's no sound, no flash, just not there.
+[1:50:11 - 1:50:15] We'll go back to Arcadia.
+[1:50:15 - 1:50:21] At this point, this bird is getting pretty frustrated with trying to grab you with its
+[1:50:21 - 1:50:23] talons.
+[1:50:23 - 1:50:33] It's going to land right next to you, its wings sort of still flapping, perhaps intentionally
+[1:50:33 - 1:50:40] to make things a little bit more difficult, fostering for you.
+[1:50:40 - 1:50:47] And it's going to be like snapping, lunging at you with its beak.
+[1:50:47 - 1:51:32] trying to take a piece out of you. Good idea. Success at a cost. All right let's get a D6
+[1:51:33 - 1:51:57] stress to blood. All right let's see what that does to you. Getting a bit of stress there but
+[1:51:57 - 1:52:11] you're safe for now. Okay and then we'll get your damage outgoing. All right yeah.
+[1:52:11 - 1:52:22] No, you're absolutely able to get a good slash on one of the wings, it seems to be that there's
+[1:52:22 - 1:52:37] some pendant throughout that, along that bone, the limb across the top of the wing that hasn't
+[1:52:37 - 1:52:49] rotted out yet. You sever that and that wing beating weakens perceptively and as you do that
+[1:52:49 - 1:52:59] we'll go back to the worse. Okay let's see how many bullets you got left there buddy.
+[1:53:08 - 1:53:26] It is until it isn't. Oh failure. Let me check that. Oh it is okay. Let's get a d6. This is
+[1:53:26 - 1:53:40] going to be two supplies uh there's a little dicing there next to the failure in the chat clock
+[1:53:53 - 1:54:25] and then you click the little heart and roll for fallout and now it's a little okay perfect
+[1:54:25 - 1:54:34] all right uh so then you click the little yeah i don't know because i i have a rough idea of what
+[1:54:34 - 1:54:40] some of the fallouts are and i was like this is just going to work out in my narrative um see
+[1:54:40 - 1:54:49] click that little refresh button and um it'll get rid of your stress. Okay as you go to take
+[1:54:49 - 1:55:00] another shot um you know the hammer resets itself the chamber the chamber revolves around
+[1:55:00 - 1:55:16] and you pull the trigger again and there's a click you realize that you've run out of that way
+[1:55:16 - 1:55:20] That's the worst time possible.
+[1:55:20 - 1:55:32] I'll drop that one on there.
+[1:55:32 - 1:55:36] The good news is that
+[1:55:36 - 1:55:40] that click happens without
+[1:55:40 - 1:55:44] the kaboom, which
+[1:55:44 - 1:55:48] is a little bit distressing, but on the back of that, suddenly
+[1:55:48 - 1:55:52] Thessia appears, and it's as if
+[1:55:52 - 1:56:02] no time has passed at all for Thessia, she presumes and quickly finishes the memory to
+[1:56:05 - 1:56:14] enchant the hive tool she's got in her hand. And you can change track now if you want, or like
+[1:56:15 - 1:56:44] resume doing what you were going to do before. Yep, cursed or occult, either of those are fine.
+[1:56:44 - 1:57:02] uh yes yes yeah it almost was the straw that killed it but not quite okay full clean success
+[1:57:02 - 1:57:46] let's get a damage roll from that weapon he's got advantage yeah kh kh or dl probably either will do
+[1:57:50 - 1:58:23] or damage all right um okay so i needed one more to kill it yes
+[1:58:23 - 1:59:05] Yes. Absolutely. It is definitely the flashing weak spot on this rotting butcher. It cries
+[1:59:05 - 1:59:17] the heart out of its chest. It gives one more screech and lunge at Arcadia. It seems to
+[1:59:17 - 1:59:28] be single-minded, where she perhaps, you know, sort of jumps to the side to dodge it and
+[1:59:28 - 1:59:42] it just continues forward and falls to the ground in a heap. And silence descends once
+[1:59:42 - 1:59:56] Once again, after that very abrupt scuffle, save for the panting probably coming from
+[1:59:56 - 2:00:12] Arcadia and perhaps Thessia as well, I imagine Arcadia still there, barely holding on to
+[2:00:12 - 2:01:28] her sense of being with her altered form what happens in the aftermath say holding the heart
+[2:01:28 - 2:02:37] and the tools sticking out of it so i think we're going to go with the two of you have not seen this
+[2:02:39 - 2:02:57] transformation previously this is disturbing at least horrific at worst Arcadia seems to
+[2:02:57 - 2:04:32] Nick, I'm very curious, like, what's going on with Worth at the moment?
+[2:04:32 - 2:04:39] I'm going to say that your ledger indicates that your supplies should be... they should
+[2:04:39 - 2:04:51] not have run out yet, and Worth knows that, and it's confronting to be experiencing a
+[2:04:51 - 2:05:12] reality that is at odds with your... your record keeping's never failed and it shouldn't. Okay.
+[2:05:17 - 2:05:20] As he is over here like, ah something wrong, fuck it, yeah.
+[2:05:21 - 2:05:25] Wes like, yeah, yeah, yeah, that's fine, whatever, I'm just dealing with some stuff over here.
+[2:05:40 - 2:05:44] Unless you feel a particularly different way about it, Nicole.
+[2:05:44 - 2:05:53] I'm going to imagine the scene playing out such that as Arcadia is standing there, sort
+[2:05:53 - 2:06:02] of occasionally shifting one frame, you know, to the left or to the right, looking down
+[2:06:02 - 2:06:13] at this heart in her hand, perhaps still very slowly, infrequently giving an occasional
+[2:06:13 - 2:06:24] beat that you will gradually return to your original normal self. It seems to be having some
+[2:06:26 - 2:07:25] calming effect on you. Perfect. Yep, I'm fine with that. While Nicole's working that out,
+[2:07:25 - 2:07:30] if anybody else has answer session stuff, just have a quick look at your sheet.
+[2:07:30 - 2:07:49] it's getting close to the time to use it. Wothers tried to help you but Wothers
+[2:07:49 - 2:07:55] realized that Wothers also, well let's say yeah let's say you lost it because he
+[2:07:55 - 2:07:59] rolled for it right so between the two of you you've been able to scrap it off
+[2:07:59 - 2:08:26] together but yeah he will keep it unless yeah yeah back to one of the things that
+[2:08:26 - 2:08:44] we looked at before. Worth feels most strongly now that the items of value that he was sensing
+[2:08:45 - 2:09:01] are very nearby, probably 10 feet above you roughly in a couple of directions but
+[2:09:01 - 2:09:35] most prominently in the area surrounding the the clearing that the tree is in. Yeah so follow like
+[2:09:36 - 2:09:43] the direction that he's pointing in and it's like directly up at the corpse that
+[2:09:45 - 2:09:51] Sier had spied earlier and as you you know point around to a a couple of other spots
+[2:09:51 - 2:09:58] you see that you know there's there's more of these unfortunates that have
+[2:09:58 - 2:10:18] been saved for later up on these bony spikes. Yeah it's it's very strong here
+[2:10:18 - 2:10:23] and it is like a hundred percent coming from the corpses. Perhaps desperately
+[2:10:23 - 2:10:38] hoping that someone would come and save them but yeah. Do you think it's like fun
+[2:10:38 - 2:10:47] there's one still alive because there could be. Yeah I had in my mind that it was like lingering
+[2:10:48 - 2:11:10] desperation but let's do odds or evens to find someone. Yeah not too long
+[2:11:11 - 2:11:17] you feel someone may have been alive before but this took a little bit too long to get here.
+[2:11:17 - 2:11:59] it seems like they've bled out in the meantime. Yeah I'm gonna say it's red it's like pretty
+[2:11:59 - 2:12:26] pretty like dark and uh sticky yeah I was gonna say you know like there's a fair amount of viscosity
+[2:12:26 - 2:12:34] to this blot like it is pretty thick and uh yeah the bees it's probably almost like the
+[2:12:34 - 2:12:39] the consistency of honey will be most pleased.
+[2:13:32 - 2:13:41] Yeah, equipment.
+[2:13:48 - 2:13:55] I'm going to say for now, that's going to, you know, take a little bit more answering.
+[2:13:57 - 2:14:05] But I will say this heart itself can potentially be used as a resource.
+[2:14:05 - 2:14:08] You might want to hold onto it for narrative purposes.
+[2:14:08 - 2:14:26] Let me see if I can add this on now because I didn't have this one prepped.
+[2:14:26 - 2:14:51] It is, which is heart, it's a D6, domain is cursed, I also want to give it a cult, and
+[2:14:51 - 2:15:05] it will also have the harmful tag.
+[2:15:05 - 2:15:11] Harmful resources have the capacity to harm those who carry it via black magic, illness
+[2:15:11 - 2:15:25] or strange energies. Potential. Worth wants to lead
+[2:15:25 - 2:15:33] an effort, or maybe not lead an effort, oversee an effort to
+[2:15:33 - 2:15:41] relieve some of the other victims of their belongings.
+[2:15:41 - 2:15:49] So with that, a couple of things that you can find if you
+[2:15:49 - 2:16:00] scale up and rifle through their possessions. I've got another
+[2:16:00 - 2:16:17] resource you find on one of the bodies of vials filled with
+[2:16:17 - 2:16:21] well they're they're not labeled and they're filled with
+[2:16:21 - 2:16:29] something you don't know what but they could be traded they are a d6
+[2:16:29 - 2:16:46] with the wild domain. Create that over onto your sheet. There is also on one of the bodies
+[2:16:47 - 2:17:01] dangling very precariously off a strap still sort of hanging off this
+[2:17:01 - 2:17:17] This body's torso is barely holding on a rifle, so there is a ranged weapon that can be taken.
+[2:17:17 - 2:17:33] It has D8 damage, this one is extreme range, but it has the unreliable tag.
+[2:17:33 - 2:18:26] Unreliable Ken Jam, so yeah, I'm gonna drag that over to your sheet for now.
+[2:18:26 - 2:18:38] Okay, a couple of things before we clean up this situation with the butcher.
+[2:18:38 - 2:18:47] What have we done so far?
+[2:18:47 - 2:18:54] Let's get roll a d6.
+[2:18:54 - 2:19:06] We'll put some stress on this, we'll put some stress on the Delve.
+[2:19:06 - 2:19:12] Actually, actually, I think I might move it up to a d8 for how many actions were just
+[2:19:12 - 2:19:13] taken.
+[2:19:13 - 2:19:24] Okay, well, Liza, you roll it, I don't mind who rolls it.
+[2:19:24 - 2:19:35] Let's make it a d8.
+[2:19:35 - 2:19:36] There it is.
+[2:19:36 - 2:19:37] Alright.
+[2:19:37 - 2:19:42] 1, 6, 7, 8.
+[2:19:42 - 2:19:43] Alright.
+[2:19:43 - 2:19:53] The last thing I had set up was if the rotting butcher was defeated, that would open a connection
+[2:19:53 - 2:20:02] this delve which will make it half as difficult to come back because you could have snuck past it
+[2:20:02 - 2:20:16] but you decided to kill it so that's uh yeah that's a big change yeah
+[2:24:51 - 2:25:25] no no it's still upside down yeah yeah sure they're like uh lying across the
+[2:25:25 - 2:25:35] ground like you may see some some trees that have you know roots above ground
+[2:25:35 - 2:25:43] like the branches are kind of like that but they're clearly branches no waves
+[2:25:43 - 2:27:11] just yeah empty thick branches yeah no this tree like you stand there for a
+[2:27:11 - 2:27:20] moment with your hand on it, imagine maybe even like hoping that something would happen
+[2:27:24 - 2:27:32] and after giving it some time to get the sense that this this tree is dead and has been for a
+[2:27:32 - 2:27:51] while. This place is a place of death. The dead tree, the dead bird, the bones, the victims that
+[2:27:51 - 2:28:11] it stopped its ladder with all dead and I think yeah keep going keep going you just got in there
+[2:33:31 - 2:34:17] all right what we're gonna do is move three of you along on your journey um after the scene
+[2:34:17 - 2:34:23] that the running butcher's ladder fades out and comes back in on this review, continuing
+[2:34:25 - 2:34:39] along your way, along the spine of silence. And you notice that the air begins to grow
+[2:34:40 - 2:34:52] not overly but somewhat warmer, particularly drier. That's probably what stands out.
+[2:34:53 - 2:35:01] and you start catching the scent of parchment dust and perhaps some faint ozone
+[2:35:04 - 2:35:21] and the walls begin to shift, slowly change from bone at the end of the rib cage
+[2:35:21 - 2:35:41] back into stone. This section seems to be panelled, the walls, with some timber. You can hear further
+[2:35:41 - 2:35:55] along faint murmurs, maybe people talking softly or perhaps the rustle of the pages turning
+[2:35:55 - 2:36:11] themselves. And you look down and see that ground beneath you has gradually changed into a carpeted
+[2:36:11 - 2:36:32] ground. You look up again and realize that you're now inside a hallway ahead of you, carved archway,
+[2:36:32 - 2:36:47] large imposing as a drawing era you see that it bears a single inscription overhead knowledge is
+[2:36:47 - 2:37:00] weight enter burdened close out session on the three of you standing before this archway
+[2:37:00 - 2:37:13] That's the entrance to the horde in the dim flickering light of your lantern.
+[2:37:13 - 2:37:24] And that is, yeah, I guess like the first proper delve done, good job.
+[2:37:24 - 2:37:29] Everybody crashed out and, you know, had a bunch of major fallouts.
+[2:37:29 - 2:37:33] Thought we might have been headed in that direction for a little while there, but yeah,
+[2:37:33 - 2:37:40] you studied the ship, which was great.
+[2:37:40 - 2:37:51] I'm happy to say at this point that Arcadia you can tick off the beat to see something
+[2:37:51 - 2:37:56] from your dreams in the real world, so ahead of next session, think that way.
