@@ -1571,10 +1571,17 @@ class TTRPGSummarizer:
 
     def merge_consecutive_speaker_segments(self, segments: List[Dict]) -> List[Dict]:
         """
-        Merge consecutive segments from the same speaker into single entries
+        Merge segments from the same speaker that are truly consecutive.
+
+        Only merges when:
+        - Same speaker
+        - No other speaker spoke in between (in the sorted timeline)
+
+        This preserves natural back-and-forth conversation flow.
 
         Args:
             segments: List of segments with 'speaker', 'start', 'end', 'text'
+                     (MUST be pre-sorted by start time)
 
         Returns:
             List of merged segments
@@ -1593,12 +1600,14 @@ class TTRPGSummarizer:
         for seg in segments[1:]:
             speaker = seg.get("speaker", "UNKNOWN")
 
-            # If same speaker, merge with current
+            # Only merge if it's the IMMEDIATE next segment from same speaker
+            # If speaker changed and changed back, don't merge (preserve conversation flow)
             if speaker == current["speaker"]:
+                # Same speaker continuing - merge this segment
                 current["end"] = seg["end"]
                 current["text"] += " " + seg["text"].strip()
             else:
-                # Different speaker, save current and start new
+                # Different speaker - save current and start new
                 merged.append(current)
                 current = {
                     "speaker": speaker,
