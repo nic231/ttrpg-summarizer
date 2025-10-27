@@ -2599,6 +2599,10 @@ COMPREHENSIVE SESSION SUMMARY:"""
 
         all_segments = []
         for audio_file, transcript_data in file_transcripts.items():
+            speaker = file_to_speaker[audio_file]
+            # Add speaker info to each segment
+            for seg in transcript_data["segments"]:
+                seg["speaker"] = speaker
             all_segments.extend(transcript_data["segments"])
 
         # Sort by start time
