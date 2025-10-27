@@ -5015,9 +5015,112 @@ def configuration_gui():
         mode = task_mode_var.get()
 
         if not audio_file_var.get():
-            error_msg = "Please select a chunk summary JSON file!" if mode == "existing_chunks" else "Please select an audio file!"
+            if mode == "existing_chunks":
+                error_msg = "Please select a chunk summary JSON file!"
+            elif mode == "existing_transcript":
+                error_msg = "Please select a transcript file!"
+            else:
+                error_msg = "Please select an audio file!"
             write_to_console(f"❌ ERROR: {error_msg}")
             messagebox.showerror("Error", error_msg)
+            return
+
+        # Check if we're in "existing transcript" mode
+        if mode == "existing_transcript":
+            # Process transcript in a separate thread
+            def process_transcript():
+                try:
+                    transcript_file = audio_file_var.get()
+                    write_to_console(f"✓ Loading transcript from: {Path(transcript_file).name}")
+
+                    with open(transcript_file, 'r', encoding='utf-8') as f:
+                        full_text = f.read()
+
+                    write_to_console(f"✓ Loaded transcript: {len(full_text):,} characters\n")
+
+                    # Create summarizer instance
+                    summarizer = TTRPGSummarizer(
+                        whisper_model="base",
+                        ollama_model=ollama_chunk_model_var.get(),
+                        enable_diarization=False,
+                        chunk_target_words=chunk_words_var.get(),
+                        final_summary_target_words=final_words_var.get(),
+                        chunk_context_size=chunk_context_var.get(),
+                        ollama_final_model=final_model_var.get(),
+                        final_context_size=final_context_var.get(),
+                        stop_event=stop_event,
+                        pause_event=pause_event,
+                        skip_whisper_load=True,
+                        campaign_character_file=character_file_var.get() if character_file_var.get() else None,
+                        preconfigured_final_summary=(final_config_mode_var.get() == "now")
+                    )
+
+                    # Get campaign context
+                    campaign_context = summarizer.get_campaign_context()
+
+                    # Chunk and summarize
+                    chunks = summarizer.chunk_text(full_text)
+
+                    write_to_console(f"\n{'='*60}")
+                    write_to_console(f"CHUNK SUMMARIZATION")
+                    write_to_console(f"{'='*60}")
+                    write_to_console(f"Total chunks: {len(chunks)}\n")
+
+                    chunk_summaries = []
+                    progressive_context = ""
+
+                    for i, chunk in enumerate(chunks, 1):
+                        summarizer.check_control_events()
+                        summary = summarizer.summarize_chunk(chunk, i, len(chunks), context=campaign_context, previous_context=progressive_context)
+                        chunk_summaries.append(summary)
+
+                        short_context = summarizer.create_short_context(summary)
+                        progressive_context = (progressive_context + "\n" + short_context) if progressive_context else short_context
+
+                        # Limit context
+                        context_words = progressive_context.split()
+                        if len(context_words) > 500:
+                            progressive_context = " ".join(context_words[-500:])
+
+                        write_to_console("  Building context for next chunk... ✓")
+
+                    # Save outputs
+                    output_dir = Path(transcript_file).parent
+                    session_name = Path(transcript_file).stem.replace("_transcript", "").replace("_formatted", "")
+
+                    chunk_file = output_dir / f"{session_name}_chunk_summaries_readable.txt"
+                    with open(chunk_file, 'w', encoding='utf-8') as f:
+                        for i, summary in enumerate(chunk_summaries, 1):
+                            f.write(f"{'='*80}\nCHUNK {i} of {len(chunk_summaries)}\n{'='*80}\n\n{summary}\n\n")
+
+                    write_to_console(f"\n✓ Chunk summaries saved: {chunk_file.name}")
+
+                    # Final summary
+                    overall_summary = summarizer.create_overall_summary(
+                        chunk_summaries,
+                        context=campaign_context,
+                        final_context_size=final_context_var.get(),
+                        include_characters=False
+                    )
+
+                    model_safe = final_model_var.get().replace(':', '_').replace('/', '_')
+                    summary_file = output_dir / f"{session_name}_summary_{model_safe}.txt"
+                    with open(summary_file, 'w', encoding='utf-8') as f:
+                        f.write(overall_summary)
+
+                    write_to_console(f"✓ Final summary saved: {summary_file.name}")
+                    write_to_console(f"\n{'='*60}\n✅ PROCESSING COMPLETE!\n{'='*60}")
+
+                    messagebox.showinfo("Success", f"Summary generated!\n\nSaved to:\n{summary_file}")
+
+                except Exception as e:
+                    write_to_console(f"\n❌ ERROR: {str(e)}")
+                    messagebox.showerror("Error", f"Failed to process transcript:\n{str(e)}")
+                    import traceback
+                    traceback.print_exc()
+
+            # Start in background thread
+            threading.Thread(target=process_transcript, daemon=True).start()
             return
 
         # Check if we're in "existing chunks" mode
