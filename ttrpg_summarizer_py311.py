@@ -1114,7 +1114,7 @@ class TTRPGSummarizer:
 
         scrollable_frame.bind(
             "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+            lambda _: canvas.configure(scrollregion=canvas.bbox("all"))
         )
 
         canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
@@ -1385,6 +1385,129 @@ class TTRPGSummarizer:
             print(f"Speaker mapping: {speaker_map}")
             return speaker_map
 
+    def get_party_members_dialog(self, parent) -> List[tuple]:
+        """
+        Custom dialog for adding party members with +/- buttons
+
+        Args:
+            parent: Parent tkinter window
+
+        Returns:
+            List of (character_name, role) tuples
+        """
+        dialog = tk.Toplevel(parent)
+        dialog.title("Campaign Context - Party Members")
+        dialog.geometry("500x400")
+        dialog.attributes('-topmost', True)
+
+        # Instructions
+        instructions = tk.Label(
+            dialog,
+            text="Add party members and their classes/roles:\n"
+                 "Use + to add more characters, - to remove the last one",
+            justify=tk.LEFT,
+            padx=10,
+            pady=10
+        )
+        instructions.pack()
+
+        # Scrollable frame for character entries
+        canvas = tk.Canvas(dialog)
+        scrollbar = tk.Scrollbar(dialog, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas)
+
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda _: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        # Store entry widgets
+        character_entries = []
+
+        def add_character_row():
+            """Add a new character/role entry row"""
+            row_frame = tk.Frame(scrollable_frame)
+            row_frame.pack(fill=tk.X, padx=10, pady=5)
+
+            # Character name
+            char_label = tk.Label(row_frame, text="Character:", width=10)
+            char_label.pack(side=tk.LEFT)
+            char_entry = tk.Entry(row_frame, width=20)
+            char_entry.pack(side=tk.LEFT, padx=5)
+
+            # Role/class
+            role_label = tk.Label(row_frame, text="Role:", width=8)
+            role_label.pack(side=tk.LEFT)
+            role_entry = tk.Entry(row_frame, width=20)
+            role_entry.pack(side=tk.LEFT, padx=5)
+
+            character_entries.append((row_frame, char_entry, role_entry))
+
+            # Update canvas scroll region
+            canvas.update_idletasks()
+            canvas.configure(scrollregion=canvas.bbox("all"))
+
+        def remove_character_row():
+            """Remove the last character/role entry row"""
+            if character_entries:
+                row_frame, _, _ = character_entries.pop()
+                row_frame.destroy()
+
+                # Update canvas scroll region
+                canvas.update_idletasks()
+                canvas.configure(scrollregion=canvas.bbox("all"))
+
+        # Button frame
+        button_frame = tk.Frame(dialog)
+        button_frame.pack(fill=tk.X, padx=10, pady=5)
+
+        # +/- buttons
+        add_btn = tk.Button(button_frame, text="+", command=add_character_row, width=5, font=("Arial", 14, "bold"))
+        add_btn.pack(side=tk.LEFT, padx=5)
+
+        remove_btn = tk.Button(button_frame, text="-", command=remove_character_row, width=5, font=("Arial", 14, "bold"))
+        remove_btn.pack(side=tk.LEFT, padx=5)
+
+        # Pack canvas and scrollbar
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(10, 0), pady=5)
+        scrollbar.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 10), pady=5)
+
+        # Add first character row by default
+        add_character_row()
+
+        # OK/Cancel buttons
+        result = []
+
+        def on_ok():
+            """Collect all character entries"""
+            for _, char_entry, role_entry in character_entries:
+                char_name = char_entry.get().strip()
+                role = role_entry.get().strip()
+                if char_name:  # Only add if character name is provided
+                    result.append((char_name, role if role else "Unknown"))
+            dialog.destroy()
+
+        def on_cancel():
+            """Cancel and return empty list"""
+            dialog.destroy()
+
+        ok_cancel_frame = tk.Frame(dialog)
+        ok_cancel_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        ok_btn = tk.Button(ok_cancel_frame, text="OK", command=on_ok, width=10)
+        ok_btn.pack(side=tk.LEFT, padx=5)
+
+        cancel_btn = tk.Button(ok_cancel_frame, text="Cancel", command=on_cancel, width=10)
+        cancel_btn.pack(side=tk.LEFT, padx=5)
+
+        # Wait for dialog to close
+        dialog.wait_window()
+
+        return result
+
     def get_campaign_context(self) -> Dict[str, str]:
         """
         Get campaign context information from user via GUI
@@ -1421,21 +1544,18 @@ class TTRPGSummarizer:
             parent=root
         )
 
-        # Get party members
-        party_members = simpledialog.askstring(
-            "Campaign Context - Party Members",
-            "List the party members and their classes/roles:\n\n"
-            "Example: Thorin (Dwarf Fighter), Elara (Elf Wizard), Pip (Halfling Rogue)\n\n"
-            "Press Cancel to skip:",
-            parent=root
-        )
+        # Get party members with custom dialog
+        party_members_list = self.get_party_members_dialog(root)
+
+        # Format party members as comma-separated list
+        party_members = ", ".join([f"{name} ({role})" for name, role in party_members_list]) if party_members_list else ""
 
         root.destroy()
 
         context = {
             "system": system.strip() if system else "",
             "setting": setting.strip() if setting else "",
-            "party_members": party_members.strip() if party_members else ""
+            "party_members": party_members
         }
 
         # Display the context that will be used
