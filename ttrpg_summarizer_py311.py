@@ -1794,43 +1794,88 @@ Detailed Summary (ONLY based on actual transcript content):"""
         if safe_chunk_context is not None:
             chunk_options['num_ctx'] = safe_chunk_context
 
-        # Stream the response
-        stream = ollama.chat(
-            model=self.ollama_model,
-            messages=[{
-                'role': 'user',
-                'content': prompt
-            }],
-            options=chunk_options,
-            keep_alive='5m',  # Keep model loaded for 5 minutes to avoid reloading between chunks
-            stream=True  # Enable streaming
-        )
+        # Retry logic for Ollama memory errors
+        max_retries = 3
+        retry_count = 0
 
-        # Process stream and show progress
-        for chunk_data in stream:
-            if 'message' in chunk_data and 'content' in chunk_data['message']:
-                content = chunk_data['message']['content']
-                summary += content
-                token_count += 1
+        while retry_count < max_retries:
+            try:
+                # Stream the response
+                stream = ollama.chat(
+                    model=self.ollama_model,
+                    messages=[{
+                        'role': 'user',
+                        'content': prompt
+                    }],
+                    options=chunk_options,
+                    keep_alive='5m',  # Keep model loaded for 5 minutes to avoid reloading between chunks
+                    stream=True  # Enable streaming
+                )
 
-                # Update progress every second
-                current_time = time.time()
-                if current_time - last_update >= 1.0:
-                    elapsed = current_time - start_time
-                    tokens_per_sec = token_count / elapsed if elapsed > 0 else 0
+                # Process stream and show progress
+                for chunk_data in stream:
+                    if 'message' in chunk_data and 'content' in chunk_data['message']:
+                        content = chunk_data['message']['content']
+                        summary += content
+                        token_count += 1
 
-                    # Estimate progress (assume ~1024 tokens max for chunks)
-                    progress_pct = min(100, (token_count / 1024) * 100)
+                        # Update progress every second
+                        current_time = time.time()
+                        if current_time - last_update >= 1.0:
+                            elapsed = current_time - start_time
+                            tokens_per_sec = token_count / elapsed if elapsed > 0 else 0
 
-                    # Compact progress bar for chunks
-                    bar_length = 20
-                    filled = int(bar_length * progress_pct / 100)
-                    bar = '█' * filled + '░' * (bar_length - filled)
+                            # Estimate progress (assume ~1024 tokens max for chunks)
+                            progress_pct = min(100, (token_count / 1024) * 100)
 
-                    print(f"\r  [{bar}] {progress_pct:.0f}% | {token_count} tok | {tokens_per_sec:.1f} tok/s   ",
-                          end='', flush=True)
+                            # Compact progress bar for chunks
+                            bar_length = 20
+                            filled = int(bar_length * progress_pct / 100)
+                            bar = '█' * filled + '░' * (bar_length - filled)
 
-                    last_update = current_time
+                            print(f"\r  [{bar}] {progress_pct:.0f}% | {token_count} tok | {tokens_per_sec:.1f} tok/s   ",
+                                  end='', flush=True)
+
+                            last_update = current_time
+
+                # Success! Break out of retry loop
+                break
+
+            except Exception as e:
+                error_msg = str(e)
+                retry_count += 1
+
+                # Check if it's a memory/VRAM error
+                if "llama runner process has terminated" in error_msg or "GGML_ASSERT" in error_msg or "status code: 500" in error_msg:
+                    print(f"\n  ⚠️  Ollama memory error on chunk {chunk_number} (attempt {retry_count}/{max_retries})")
+
+                    if retry_count < max_retries:
+                        print(f"  🔄 Unloading model and retrying in 5 seconds...")
+
+                        # Unload the model to free memory
+                        try:
+                            import subprocess
+                            subprocess.run(['ollama', 'stop', self.ollama_model],
+                                         capture_output=True, timeout=10)
+                        except:
+                            pass
+
+                        # Wait for memory to clear
+                        time.sleep(5)
+
+                        # Reset for retry
+                        summary = ""
+                        token_count = 0
+                        start_time = time.time()
+                        last_update = time.time()
+                    else:
+                        print(f"  ❌ Failed after {max_retries} attempts. Skipping this chunk.")
+                        summary = f"[ERROR: Failed to summarize chunk {chunk_number} due to memory issues after {max_retries} attempts]"
+                        break
+                else:
+                    # Different error, don't retry
+                    print(f"\n  ❌ Error summarizing chunk {chunk_number}: {error_msg}")
+                    raise
 
         # Final update
         elapsed = time.time() - start_time
