@@ -1619,33 +1619,25 @@ CRITICAL INSTRUCTIONS:
 4. DO NOT create fantasy stories, character names, locations, or events that aren't explicitly mentioned
 5. If something is unclear or ambiguous, note it as such - don't guess
 
-Please provide a DETAILED summary (aim for {self.chunk_target_words} words) that captures what ACTUALLY happened:
+Write a NARRATIVE summary (aim for {self.chunk_target_words} words) that tells the story of what happened in this part of the session.
 
-**Story & Plot:**
-- What happened in the narrative? What locations were visited?
-- What mysteries, quests, or objectives were revealed or pursued?
-- Any backstory, lore, or world-building revealed?
+STYLE GUIDELINES:
+- Write in a flowing narrative style, like recounting the session to someone who wasn't there
+- Focus on the story and what the characters DID, not on categorizing information
+- Naturally weave in details about NPCs, items, and decisions as they come up in the story
+- Use character names and be specific about locations and events
+- Avoid section headers and bullet points - write in paragraphs that flow together
+- Start with what was happening and build from there chronologically
 
-**Characters & NPCs:**
-- What did each player character do? What were their motivations?
-- What NPCs appeared? What did they say or reveal?
-- Try to identify NPCs by name or role (e.g., "the tavern keeper," "a mysterious hooded figure")
-- Note: The DM (Dungeon Master) often speaks AS different NPCs - try to identify which character is speaking based on context
+WHAT TO INCLUDE:
+- The narrative progression: what happened, where the party went, what they encountered
+- Character actions and decisions: what did each PC do and why?
+- NPCs and dialogue: who did they meet and what was said?
+- Combat and challenges: describe encounters as part of the story flow
+- Items and discoveries: mention what was found naturally as it happens in the narrative
+- Consequences and outcomes: what resulted from the party's actions?
 
-**Combat & Challenges:**
-- Describe any combat encounters: who fought whom? What tactics were used?
-- What skill checks, puzzles, or challenges occurred?
-- What were the outcomes and consequences?
-
-**Items & Rewards:**
-- What loot, treasure, or items were found?
-- Any magical items, weapons, or important discoveries?
-
-**Decisions & Consequences:**
-- What important choices did the party make?
-- What are the immediate consequences or next steps?
-
-Be specific with names, locations, and details ONLY from the actual transcript. This will help players remember the session.
+Think of this as writing a session recap that captures the experience and helps players remember what happened, not as creating a structured database of information.
 
 Transcript chunk:
 {chunk}
