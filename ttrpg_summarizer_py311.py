@@ -478,27 +478,33 @@ class TTRPGSummarizer:
                 "condition_on_previous_text": False  # Prevent hallucinations from context
             }
 
-            # VAD (Voice Activity Detection) for multi-file mode
-            # Use faster-whisper if available for proper VAD support
-            if use_vad and FASTER_WHISPER_AVAILABLE:
-                print("  Using faster-whisper with VAD (silero-vad) to skip muted sections\n")
-                # Use faster-whisper with VAD
+            # Use faster-whisper for ALL transcriptions if available (4x faster + better accuracy)
+            # Enable VAD in multi-file mode to skip muted microphone sections
+            if FASTER_WHISPER_AVAILABLE:
+                if use_vad:
+                    print("  Using faster-whisper with VAD (silero-vad) to skip muted sections\n")
+                else:
+                    print("  Using faster-whisper (4x faster than standard Whisper)\n")
+
+                # Load faster-whisper model
                 faster_model = FasterWhisperModel(
                     self.whisper_model_name,
                     device="cuda" if self.device == "cuda" else "cpu",
                     compute_type="float16" if self.device == "cuda" else "int8"
                 )
-                # Transcribe with VAD
+
+                # Transcribe with optional VAD
                 segments_gen, info = faster_model.transcribe(
                     audio_path,
                     language="en",
-                    vad_filter=True,  # Enable VAD
+                    vad_filter=use_vad,  # Enable VAD only for multi-file mode
                     vad_parameters=dict(
                         min_silence_duration_ms=2000,  # 2 seconds of silence to skip
                         threshold=0.5  # Sensitivity
-                    ),
+                    ) if use_vad else None,
                     condition_on_previous_text=False
                 )
+
                 # Convert generator to list and format like standard whisper
                 segments_list = list(segments_gen)
                 result = {
@@ -513,15 +519,15 @@ class TTRPGSummarizer:
                     ],
                     "language": info.language
                 }
+
                 # Clean up faster-whisper model
                 del faster_model
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
             else:
-                if use_vad and not FASTER_WHISPER_AVAILABLE:
-                    print("  ⚠️  VAD requested but faster-whisper not available")
-                    print("  Run: pip install faster-whisper")
-                    print("  Falling back to standard Whisper\n")
+                # Fallback to standard Whisper
+                print("  ⚠️  faster-whisper not available, using standard Whisper")
+                print("  Run: pip install faster-whisper for 4x speedup\n")
                 result = self.whisper_model.transcribe(**transcribe_params)
         except Exception as e:
             # Restore stdout before re-raising
@@ -2513,6 +2519,51 @@ COMPREHENSIVE SESSION SUMMARY:"""
             file_transcripts[audio_file] = transcription_data
 
         timings['transcription'] = time.time() - transcription_start
+
+        # Step 1.5: Calculate timestamp offsets based on file duration differences
+        # (Handles late joiners - shorter files get offset to align with longest)
+        print(f"\n{'='*60}")
+        print(f"CALCULATING TIMESTAMP OFFSETS")
+        print(f"{'='*60}\n")
+
+        # Get duration of each audio file
+        file_durations = {}
+        for audio_file in file_to_speaker.keys():
+            try:
+                import librosa
+                duration = librosa.get_duration(path=audio_file)
+                file_durations[audio_file] = duration
+                speaker = file_to_speaker[audio_file]
+                print(f"{speaker}: {duration/60:.1f} minutes ({duration:.1f} seconds)")
+            except Exception as e:
+                print(f"Warning: Could not get duration for {audio_file}: {e}")
+                file_durations[audio_file] = 0
+
+        # Find the longest file (baseline - no offset)
+        max_duration = max(file_durations.values()) if file_durations else 0
+        longest_file = max(file_durations, key=file_durations.get) if file_durations else None
+
+        if max_duration > 0:
+            print(f"\nLongest file: {file_to_speaker[longest_file]} ({max_duration/60:.1f} minutes)")
+            print("Applying timestamp offsets to align shorter files:\n")
+
+            # Apply timestamp offsets to shorter files
+            for audio_file, duration in file_durations.items():
+                if duration < max_duration:
+                    offset = max_duration - duration
+                    speaker = file_to_speaker[audio_file]
+                    print(f"  {speaker}: +{offset:.1f}s offset (joined {offset:.1f}s late)")
+
+                    # Apply offset to all segments for this speaker
+                    transcription_data = file_transcripts[audio_file]
+                    for seg in transcription_data["segments"]:
+                        seg["start"] += offset
+                        seg["end"] += offset
+                else:
+                    speaker = file_to_speaker[audio_file]
+                    print(f"  {speaker}: No offset needed (baseline)")
+
+        print()
 
         # Save individual speaker transcripts (raw + filtered)
         print(f"\n{'='*60}")
