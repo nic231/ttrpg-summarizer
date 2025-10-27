@@ -4762,6 +4762,151 @@ def configuration_gui():
     update_chunk_vram()
     update_final_context_display()
 
+    # ===== SECTION 6: Prompt Editing =====
+    section6 = tk.LabelFrame(scrollable, text="  6. Prompt Editing (Optional)  ",
+                             font=("Arial", 12, "bold"),
+                             bg="white", fg="#2c3e50", padx=15, pady=15)
+    section6.pack(fill=tk.X, pady=10)
+
+    tk.Label(section6, text="Customize the instructions sent to the AI:",
+             bg="white", font=("Arial", 9), fg="#7f8c8d").pack(anchor=tk.W, pady=(0, 10))
+
+    # Store custom prompts (None = use default)
+    custom_chunk_prompt = [None]
+    custom_final_prompt = [None]
+
+    def edit_chunk_prompt():
+        """Open dialog to edit chunk summarization prompt"""
+        from tkinter import scrolledtext
+
+        dialog = tk.Toplevel(root)
+        dialog.title("Edit Chunk Summarization Prompt")
+        dialog.geometry("800x600")
+        dialog.attributes('-topmost', True)
+
+        tk.Label(dialog, text="Chunk Summarization Instructions", font=("Arial", 14, "bold"),
+                pady=10).pack()
+
+        tk.Label(dialog, text="These instructions are sent to the AI for each chunk of the transcript.",
+                font=("Arial", 9), fg="#7f8c8d", wraplength=750, justify=tk.LEFT).pack(padx=10, pady=5)
+
+        # Get default prompt (simplified version for display)
+        default_prompt = """Write a NARRATIVE summary that tells the story of what happened in this part of the session.
+
+STYLE GUIDELINES:
+- Write in a flowing narrative style, like recounting the session to someone who wasn't there
+- Focus on the story and what the characters DID, not on categorizing information
+- Naturally weave in details about NPCs, items, and decisions as they come up in the story
+- Use character names and be specific about locations and events
+- Avoid section headers and bullet points - write in paragraphs that flow together
+- Start with what was happening and build from there chronologically
+
+WHAT TO INCLUDE:
+- The narrative progression: what happened, where the party went, what they encountered
+- Character actions and decisions: what did each PC do and why?
+- NPCs and dialogue: who did they meet and what was said?
+- Combat and challenges: describe encounters as part of the story flow
+- Items and discoveries: mention what was found naturally as it happens in the narrative
+- Consequences and outcomes: what resulted from the party's actions?
+
+Think of this as writing a session recap that captures the experience."""
+
+        text_frame = tk.Frame(dialog)
+        text_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        text_area = scrolledtext.ScrolledText(text_frame, wrap=tk.WORD, font=("Consolas", 10))
+        text_area.pack(fill=tk.BOTH, expand=True)
+        text_area.insert("1.0", custom_chunk_prompt[0] if custom_chunk_prompt[0] else default_prompt)
+
+        button_frame = tk.Frame(dialog)
+        button_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        def save_prompt():
+            custom_chunk_prompt[0] = text_area.get("1.0", tk.END).strip()
+            messagebox.showinfo("Saved", "Chunk prompt saved! It will be used for summarization.")
+            dialog.destroy()
+
+        def reset_prompt():
+            if messagebox.askyesno("Reset", "Reset to default prompt?"):
+                custom_chunk_prompt[0] = None
+                text_area.delete("1.0", tk.END)
+                text_area.insert("1.0", default_prompt)
+
+        tk.Button(button_frame, text="💾 Save", command=save_prompt, bg="#27ae60", fg="white",
+                 font=("Arial", 10, "bold"), padx=20, pady=5).pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="🔄 Reset to Default", command=reset_prompt, bg="#95a5a6", fg="white",
+                 font=("Arial", 10), padx=20, pady=5).pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="❌ Cancel", command=dialog.destroy, bg="#e74c3c", fg="white",
+                 font=("Arial", 10), padx=20, pady=5).pack(side=tk.RIGHT, padx=5)
+
+    def edit_final_prompt():
+        """Open dialog to edit final summary prompt"""
+        from tkinter import scrolledtext
+
+        dialog = tk.Toplevel(root)
+        dialog.title("Edit Final Summary Prompt")
+        dialog.geometry("800x600")
+        dialog.attributes('-topmost', True)
+
+        tk.Label(dialog, text="Final Summary Instructions", font=("Arial", 14, "bold"),
+                pady=10).pack()
+
+        tk.Label(dialog, text="These instructions are sent to the AI to generate the final comprehensive summary.",
+                font=("Arial", 9), fg="#7f8c8d", wraplength=750, justify=tk.LEFT).pack(padx=10, pady=5)
+
+        # Get default prompt (simplified)
+        default_prompt = """Create a comprehensive summary of the entire TTRPG session.
+
+Focus on:
+- Story progression and major plot developments
+- Each party member's actions and contributions
+- Key NPCs and their roles
+- Important combat encounters and outcomes
+- Significant items, discoveries, and rewards
+- Decisions made and their consequences
+- How the session ended and where things stand
+
+Write in an engaging narrative style that captures the essence of the session."""
+
+        text_frame = tk.Frame(dialog)
+        text_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+        text_area = scrolledtext.ScrolledText(text_frame, wrap=tk.WORD, font=("Consolas", 10))
+        text_area.pack(fill=tk.BOTH, expand=True)
+        text_area.insert("1.0", custom_final_prompt[0] if custom_final_prompt[0] else default_prompt)
+
+        button_frame = tk.Frame(dialog)
+        button_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        def save_prompt():
+            custom_final_prompt[0] = text_area.get("1.0", tk.END).strip()
+            messagebox.showinfo("Saved", "Final summary prompt saved! It will be used for summarization.")
+            dialog.destroy()
+
+        def reset_prompt():
+            if messagebox.askyesno("Reset", "Reset to default prompt?"):
+                custom_final_prompt[0] = None
+                text_area.delete("1.0", tk.END)
+                text_area.insert("1.0", default_prompt)
+
+        tk.Button(button_frame, text="💾 Save", command=save_prompt, bg="#27ae60", fg="white",
+                 font=("Arial", 10, "bold"), padx=20, pady=5).pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="🔄 Reset to Default", command=reset_prompt, bg="#95a5a6", fg="white",
+                 font=("Arial", 10), padx=20, pady=5).pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="❌ Cancel", command=dialog.destroy, bg="#e74c3c", fg="white",
+                 font=("Arial", 10), padx=20, pady=5).pack(side=tk.RIGHT, padx=5)
+
+    prompt_buttons_frame = tk.Frame(section6, bg="white")
+    prompt_buttons_frame.pack(fill=tk.X, pady=5)
+
+    tk.Button(prompt_buttons_frame, text="✏️  Edit Chunk Prompt", command=edit_chunk_prompt,
+             bg="#3498db", fg="white", font=("Arial", 10, "bold"), cursor="hand2",
+             padx=15, pady=8).pack(side=tk.LEFT, padx=5)
+
+    tk.Button(prompt_buttons_frame, text="✏️  Edit Final Summary Prompt", command=edit_final_prompt,
+             bg="#9b59b6", fg="white", font=("Arial", 10, "bold"), cursor="hand2",
+             padx=15, pady=8).pack(side=tk.LEFT, padx=5)
+
     # ===== BUTTONS =====
     button_frame = tk.Frame(main_frame, bg="#ecf0f1", pady=20)
     button_frame.pack(fill=tk.X)
