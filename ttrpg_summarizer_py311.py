@@ -2465,7 +2465,7 @@ COMPREHENSIVE SESSION SUMMARY:"""
 
         return overall_summary
 
-    def process_multiple_audio_files(self, file_to_speaker: Dict[str, str], output_dir: str = None, session_name: str = None, timestamp_offsets: Dict[str, float] = None) -> Dict:
+    def process_multiple_audio_files(self, file_to_speaker: Dict[str, str], output_dir: str = None, session_name: str = None) -> Dict:
         """
         Process multiple audio files (one per speaker) and merge into single transcript
 
@@ -2473,7 +2473,6 @@ COMPREHENSIVE SESSION SUMMARY:"""
             file_to_speaker: Dictionary mapping file paths to speaker names
             output_dir: Directory to save outputs (defaults to DEFAULT_OUTPUT_DIR)
             session_name: Name for this session (defaults to "multi_file_session")
-            timestamp_offsets: Dictionary mapping file paths to offset in seconds (for late joiners)
 
         Returns:
             Dictionary with all outputs
@@ -2520,28 +2519,6 @@ COMPREHENSIVE SESSION SUMMARY:"""
             file_transcripts[audio_file] = transcription_data
 
         timings['transcription'] = time.time() - transcription_start
-
-        # Step 1.5: Apply manual timestamp offsets for late joiners
-        # (Based on Craig bot Activity log join times)
-        if timestamp_offsets and any(offset > 0 for offset in timestamp_offsets.values()):
-            print(f"\n{'='*60}")
-            print(f"APPLYING TIMESTAMP OFFSETS")
-            print(f"{'='*60}\n")
-
-            for audio_file, offset in timestamp_offsets.items():
-                speaker = file_to_speaker[audio_file]
-                if offset > 0:
-                    print(f"  {speaker}: +{offset:.1f}s offset (joined {offset:.1f}s after recording started)")
-
-                    # Apply offset to all segments for this speaker
-                    transcription_data = file_transcripts[audio_file]
-                    for seg in transcription_data["segments"]:
-                        seg["start"] += offset
-                        seg["end"] += offset
-                else:
-                    print(f"  {speaker}: No offset (joined at start)")
-
-            print()
 
         # Save individual speaker transcripts (raw + filtered)
         print(f"\n{'='*60}")
@@ -3315,15 +3292,15 @@ def select_multiple_audio_files() -> List[str]:
     return list(audio_files) if audio_files else []
 
 
-def assign_speakers_to_files(audio_files: List[str]) -> tuple[Dict[str, str], Dict[str, float]]:
+def assign_speakers_to_files(audio_files: List[str]) -> Dict[str, str]:
     """
-    Ask user to assign speaker names and join time offsets to each audio file
+    Ask user to assign speaker names to each audio file
 
     Args:
         audio_files: List of audio file paths
 
     Returns:
-        Tuple of (file_to_speaker dict, file_to_offset dict in seconds)
+        Dictionary mapping file path to speaker name
     """
     print("\n" + "="*60)
     print("SPEAKER ASSIGNMENT")
@@ -3336,7 +3313,6 @@ def assign_speakers_to_files(audio_files: List[str]) -> tuple[Dict[str, str], Di
     root.attributes('-topmost', True)
 
     file_to_speaker = {}
-    file_to_offset = {}
 
     for audio_file in audio_files:
         filename = Path(audio_file).name
@@ -3378,34 +3354,14 @@ def assign_speakers_to_files(audio_files: List[str]) -> tuple[Dict[str, str], Di
             # Use suggested name if user just pressed OK
             file_to_speaker[audio_file] = suggested_name
 
-        # Ask for join time offset (in seconds)
-        offset_str = simpledialog.askstring(
-            "Join Time Offset",
-            f"Speaker: {file_to_speaker[audio_file]}\n\n"
-            f"How many seconds after the recording started did they join?\n\n"
-            f"Enter 0 if they joined at the start, or check Craig's Activity log.\n"
-            f"Example: If they joined at 00:00:14, enter 14",
-            initialvalue="0",
-            parent=root
-        )
-
-        try:
-            offset = float(offset_str) if offset_str else 0.0
-            file_to_offset[audio_file] = offset
-        except ValueError:
-            file_to_offset[audio_file] = 0.0
-            print(f"Warning: Invalid offset '{offset_str}', using 0")
-
     root.destroy()
 
     print("\nSpeaker assignments:")
     for file_path, speaker in file_to_speaker.items():
-        offset = file_to_offset.get(file_path, 0)
-        offset_str = f" (+{offset}s offset)" if offset > 0 else ""
-        print(f"  {Path(file_path).name} → {speaker}{offset_str}")
+        print(f"  {Path(file_path).name} → {speaker}")
     print()
 
-    return file_to_speaker, file_to_offset
+    return file_to_speaker
 
 
 def get_ollama_models():
@@ -4714,7 +4670,7 @@ def configuration_gui():
                 print(f"Processing {len(audio_files_list)} files")
                 print("="*60 + "\n")
 
-                file_to_speaker, file_to_offset = assign_speakers_to_files(audio_files_list)
+                file_to_speaker = assign_speakers_to_files(audio_files_list)
 
                 # Get session name from main thread variable (set before thread started)
                 session_name = multi_session_name[0]
@@ -4737,7 +4693,7 @@ def configuration_gui():
                     preconfigured_final_summary=(final_config_mode_var.get() == "now")
                 )
 
-                results = summarizer.process_multiple_audio_files(file_to_speaker, session_name=session_name, timestamp_offsets=file_to_offset)
+                results = summarizer.process_multiple_audio_files(file_to_speaker, session_name=session_name)
 
             else:
                 # Single file processing
