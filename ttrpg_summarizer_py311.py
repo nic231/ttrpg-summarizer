@@ -47,6 +47,14 @@ except ImportError:
     FASTER_WHISPER_AVAILABLE = False
     print("Warning: faster-whisper not installed. VAD will not be available.")
 
+# Try importing WhisperX for word-level timestamps
+try:
+    import whisperx
+    WHISPERX_AVAILABLE = True
+except ImportError:
+    WHISPERX_AVAILABLE = False
+    print("Warning: whisperx not installed. Word-level timestamps will not be available.")
+
 # Verify CUDA setup at startup
 print(f"Python executable: {sys.executable}")
 print(f"Python version: {sys.version}")
@@ -209,6 +217,49 @@ def clear_token() -> None:
         print("Saved token cleared")
 
 
+def load_custom_prompts() -> tuple:
+    """
+    Load custom prompts from config
+
+    Returns:
+        Tuple of (chunk_prompt, final_prompt) - None if not saved
+    """
+    config = load_config()
+    chunk_prompt = config.get("custom_chunk_prompt")
+    final_prompt = config.get("custom_final_prompt")
+    return chunk_prompt, final_prompt
+
+
+def save_custom_chunk_prompt(prompt: str) -> None:
+    """
+    Save custom chunk prompt to config
+
+    Args:
+        prompt: Custom chunk summarization prompt (None to clear)
+    """
+    config = load_config()
+    if prompt:
+        config["custom_chunk_prompt"] = prompt
+    elif "custom_chunk_prompt" in config:
+        del config["custom_chunk_prompt"]
+    save_config(config)
+
+
+def save_custom_final_prompt(prompt: str) -> None:
+    """
+    Save custom final summary prompt to config
+
+    Args:
+        prompt: Custom final summary prompt (None to clear)
+    """
+    config = load_config()
+    if prompt:
+        config["custom_final_prompt"] = prompt
+    elif "custom_final_prompt" in config:
+        del config["custom_final_prompt"]
+    save_config(config)
+
+
 def check_ollama_running() -> bool:
     """
     Check if Ollama is running and accessible
@@ -280,7 +331,8 @@ class TTRPGSummarizer:
                  final_context_size: int = None,
                  stop_event=None, pause_event=None, skip_whisper_load: bool = False,
                  campaign_character_file: Optional[str] = None,
-                 preconfigured_final_summary: bool = False):
+                 preconfigured_final_summary: bool = False, use_whisperx: bool = False,
+                 custom_chunk_prompt: Optional[str] = None, custom_final_prompt: Optional[str] = None):
         """
         Initialize the TTRPG Summarizer
 
@@ -295,6 +347,7 @@ class TTRPGSummarizer:
             chunk_context_size: Context window size for chunk summaries (default: 8192)
             ollama_final_model: Separate Ollama model for final summary (default: same as chunk model)
             skip_whisper_load: Skip loading Whisper model (for JSON-only processing)
+            use_whisperx: Use WhisperX for word-level timestamps instead of faster-whisper
         """
         # Detect GPU availability
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -303,21 +356,32 @@ class TTRPGSummarizer:
 
         # Store model name for faster-whisper fallback
         self.whisper_model_name = whisper_model
+        self.use_whisperx = use_whisperx
+
+        # WhisperX models (loaded on-demand)
+        self.whisperx_model = None
+        self.whisperx_align_model = None
+        self.whisperx_align_metadata = None
 
         if skip_whisper_load:
             print("Skipping Whisper model loading (JSON-only mode)...")
         else:
-            print(f"Loading Whisper model '{whisper_model}'...")
-            # Try loading directly to GPU for Python 3.11
-            try:
-                self.whisper_model = whisper.load_model(whisper_model, device=self.device)
-                print(f"Whisper model loaded successfully on {self.device.upper()}!")
-            except Exception as e:
-                print(f"Failed to load on GPU, falling back to CPU: {e}")
-                self.whisper_model = whisper.load_model(whisper_model, device="cpu")
-                if self.device == "cuda":
-                    self.whisper_model = self.whisper_model.to(self.device)
-                print("Whisper model loaded successfully!")
+            if use_whisperx and WHISPERX_AVAILABLE:
+                print(f"Loading WhisperX model '{whisper_model}' for word-level timestamps...")
+                # WhisperX models will be loaded on first use to save memory
+                print("✓ WhisperX will be loaded on first transcription")
+            else:
+                print(f"Loading Whisper model '{whisper_model}'...")
+                # Try loading directly to GPU for Python 3.11
+                try:
+                    self.whisper_model = whisper.load_model(whisper_model, device=self.device)
+                    print(f"Whisper model loaded successfully on {self.device.upper()}!")
+                except Exception as e:
+                    print(f"Failed to load on GPU, falling back to CPU: {e}")
+                    self.whisper_model = whisper.load_model(whisper_model, device="cpu")
+                    if self.device == "cuda":
+                        self.whisper_model = self.whisper_model.to(self.device)
+                    print("Whisper model loaded successfully!")
 
         self.ollama_model = ollama_model
         self.ollama_final_model = ollama_final_model or ollama_model  # Use same model if not specified
@@ -326,6 +390,10 @@ class TTRPGSummarizer:
         self.chunk_context_size = chunk_context_size
         self.final_context_size = final_context_size  # None or UNLIMITED_CONTEXT = unlimited
         self.preconfigured_final_summary = preconfigured_final_summary  # Skip popup if pre-configured
+
+        # Custom prompts (None = use defaults)
+        self.custom_chunk_prompt = custom_chunk_prompt
+        self.custom_final_prompt = custom_final_prompt
 
         # Control events for pause/stop
         self.stop_event = stop_event
@@ -369,6 +437,16 @@ class TTRPGSummarizer:
             del self.whisper_model
             print("  ✓ Whisper model unloaded")
 
+        # Unload WhisperX models
+        if hasattr(self, 'whisperx_model') and self.whisperx_model is not None:
+            del self.whisperx_model
+            print("  ✓ WhisperX model unloaded")
+
+        if hasattr(self, 'whisperx_align_model') and self.whisperx_align_model is not None:
+            del self.whisperx_align_model
+            del self.whisperx_align_metadata
+            print("  ✓ WhisperX alignment model unloaded")
+
         # Unload diarization pipeline
         if hasattr(self, 'diarization_pipeline') and self.diarization_pipeline is not None:
             del self.diarization_pipeline
@@ -403,7 +481,7 @@ class TTRPGSummarizer:
 
     def transcribe_audio(self, audio_file: str, use_vad: bool = False) -> Dict:
         """
-        Convert audio file to text using Whisper
+        Convert audio file to text using Whisper or WhisperX
 
         Args:
             audio_file: Path to audio file (mp3, wav, m4a, etc.)
@@ -411,12 +489,21 @@ class TTRPGSummarizer:
 
         Returns:
             Dictionary with transcription and metadata
+            If using WhisperX, segments will include 'words' array with word-level timestamps
         """
         print(f"\n{BANNER_SINGLE}")
         print(f"AUDIO TRANSCRIPTION")
         print(f"{BANNER_SINGLE}")
         print(f"File: {Path(audio_file).name}")
-        print(f"Model: whisper-{self.whisper_model.__class__.__name__}")
+
+        # Print model info
+        if self.use_whisperx:
+            print(f"Model: WhisperX-{self.whisper_model_name} (word-level timestamps)")
+        elif hasattr(self, 'whisper_model'):
+            print(f"Model: whisper-{self.whisper_model.__class__.__name__}")
+        else:
+            print(f"Model: {self.whisper_model_name}")
+
         print(f"{BANNER_SINGLE}\n")
 
         # Convert to WAV for optimal GPU performance (if not already WAV)
@@ -469,18 +556,55 @@ class TTRPGSummarizer:
         sys.stdout = WhisperProgressFilter(original_stdout)
 
         try:
-            # Build transcription parameters
-            transcribe_params = {
-                "audio": audio_path,  # Use converted WAV file for better GPU performance
-                "language": "en",
-                "verbose": True,  # Enable verbose but filter transcript lines with custom writer
-                "fp16": (self.device == "cuda"),
-                "condition_on_previous_text": False  # Prevent hallucinations from context
-            }
+            # WhisperX for word-level timestamps
+            if self.use_whisperx and WHISPERX_AVAILABLE:
+                print("  Using WhisperX for word-level timestamps\n")
+
+                # Load WhisperX model if not already loaded
+                if self.whisperx_model is None:
+                    print("  Loading WhisperX model...")
+                    self.whisperx_model = whisperx.load_model(
+                        self.whisper_model_name,
+                        self.device,
+                        compute_type="float16" if self.device == "cuda" else "int8"
+                    )
+                    print("  ✓ WhisperX model loaded\n")
+
+                # Load audio for WhisperX
+                audio = whisperx.load_audio(audio_path)
+
+                # Transcribe - WhisperX uses the model object directly
+                print("  Transcribing...")
+                result = self.whisperx_model.transcribe(audio, language="en")
+
+                # Align for word-level timestamps
+                print("  Aligning for word-level timestamps...")
+                if self.whisperx_align_model is None:
+                    self.whisperx_align_model, self.whisperx_align_metadata = whisperx.load_align_model(
+                        language_code="en",
+                        device=self.device
+                    )
+                    print("  ✓ Alignment model loaded\n")
+
+                result = whisperx.align(
+                    result["segments"],
+                    self.whisperx_align_model,
+                    self.whisperx_align_metadata,
+                    audio,
+                    self.device,
+                    return_char_alignments=False
+                )
+
+                # Format result to match expected structure
+                result = {
+                    "text": " ".join(seg.get("text", "") for seg in result["segments"]),
+                    "segments": result["segments"],  # Contains 'words' array for each segment
+                    "language": "en"
+                }
 
             # Use faster-whisper for ALL transcriptions if available (4x faster + better accuracy)
             # Enable VAD in multi-file mode to skip muted microphone sections
-            if FASTER_WHISPER_AVAILABLE:
+            elif FASTER_WHISPER_AVAILABLE:
                 if use_vad:
                     print("  Using faster-whisper with VAD (silero-vad) to skip muted sections\n")
                 else:
@@ -528,6 +652,15 @@ class TTRPGSummarizer:
                 # Fallback to standard Whisper
                 print("  ⚠️  faster-whisper not available, using standard Whisper")
                 print("  Run: pip install faster-whisper for 4x speedup\n")
+
+                # Build transcription parameters
+                transcribe_params = {
+                    "audio": audio_path,  # Use converted WAV file for better GPU performance
+                    "language": "en",
+                    "verbose": True,  # Enable verbose but filter transcript lines with custom writer
+                    "fp16": (self.device == "cuda"),
+                    "condition_on_previous_text": False  # Prevent hallucinations from context
+                }
                 result = self.whisper_model.transcribe(**transcribe_params)
         except Exception as e:
             # Restore stdout before re-raising
@@ -1569,6 +1702,99 @@ class TTRPGSummarizer:
 
         return context
 
+    def merge_word_level_transcripts(self, file_transcripts: Dict[str, Dict],
+                                     file_to_speaker: Dict[str, str]) -> List[Dict]:
+        """
+        Merge word-level transcripts from multiple speaker files.
+
+        This provides much better conversation flow than segment-level merging
+        because we merge at word granularity instead of segment granularity.
+
+        Args:
+            file_transcripts: Dict mapping file paths to transcript data (with word-level timestamps)
+            file_to_speaker: Dict mapping file paths to speaker names
+
+        Returns:
+            List of segments with proper conversation flow
+        """
+        print("\n🔀 Merging word-level transcripts for optimal conversation flow...")
+
+        # Extract all words with speaker labels
+        all_words = []
+        for audio_file, transcript_data in file_transcripts.items():
+            speaker = file_to_speaker[audio_file]
+
+            for segment in transcript_data["segments"]:
+                # WhisperX provides word-level timestamps in 'words' array
+                if "words" in segment:
+                    for word in segment["words"]:
+                        all_words.append({
+                            "speaker": speaker,
+                            "start": word.get("start", segment["start"]),
+                            "end": word.get("end", segment["end"]),
+                            "word": word.get("word", "").strip()
+                        })
+                else:
+                    # Fallback: no word-level data, treat whole segment as one "word"
+                    all_words.append({
+                        "speaker": speaker,
+                        "start": segment["start"],
+                        "end": segment["end"],
+                        "word": segment["text"].strip()
+                    })
+
+        # Sort all words by start time
+        all_words.sort(key=lambda x: x["start"])
+        print(f"  Merged {len(all_words):,} words from {len(file_transcripts)} speakers")
+
+        # Group consecutive words from the same speaker into segments
+        segments = self.group_words_by_speaker(all_words)
+        print(f"  Grouped into {len(segments)} conversation segments")
+
+        return segments
+
+    def group_words_by_speaker(self, words: List[Dict]) -> List[Dict]:
+        """
+        Group consecutive words from the same speaker into dialogue segments.
+
+        Args:
+            words: List of word dicts with 'speaker', 'start', 'end', 'word'
+                  (MUST be sorted by start time)
+
+        Returns:
+            List of segments with 'speaker', 'start', 'end', 'text'
+        """
+        if not words:
+            return []
+
+        segments = []
+        current = {
+            "speaker": words[0]["speaker"],
+            "start": words[0]["start"],
+            "end": words[0]["end"],
+            "text": words[0]["word"]
+        }
+
+        for word in words[1:]:
+            if word["speaker"] == current["speaker"]:
+                # Same speaker - add word to current segment
+                current["end"] = word["end"]
+                current["text"] += " " + word["word"]
+            else:
+                # Different speaker - save current segment and start new one
+                segments.append(current)
+                current = {
+                    "speaker": word["speaker"],
+                    "start": word["start"],
+                    "end": word["end"],
+                    "text": word["word"]
+                }
+
+        # Don't forget the last segment
+        segments.append(current)
+
+        return segments
+
     def split_overlapping_segments(self, segments: List[Dict]) -> List[Dict]:
         """
         Truncate segments when other speakers start talking.
@@ -1782,7 +2008,20 @@ Brief summary (2-3 sentences):"""
             # Middle chunk
             session_position = f"You are summarizing part {chunk_number} of {total_chunks} from an ongoing TTRPG session.\nThis is a CONTINUATION of the session, not the start or end."
 
-        prompt = f"""{session_position}
+        # Use custom prompt if provided, otherwise use default
+        if self.custom_chunk_prompt:
+            # Custom prompt - use as-is but add context and transcript
+            prompt = f"""{session_position}
+{context_header}{previous_context_section}
+{self.custom_chunk_prompt}
+
+Transcript chunk:
+{chunk}
+
+Summary:"""
+        else:
+            # Default prompt
+            prompt = f"""{session_position}
 {context_header}{previous_context_section}
 CRITICAL INSTRUCTIONS:
 1. ONLY summarize what is ACTUALLY in the transcript below
@@ -2131,6 +2370,304 @@ Summary to analyze:
         except Exception as e:
             print(f"⚠️  Could not save campaign characters: {e}")
 
+    def save_npcs_to_directory(self, session_name: str):
+        """
+        Save individual NPC files to the NPCs directory for easy viewing and editing.
+
+        Args:
+            session_name: Name of the session (used to organize files)
+        """
+        if not self.characters:
+            return
+
+        # Create NPCs directory if it doesn't exist
+        npcs_dir = DEFAULT_NPCS_DIR / session_name
+        npcs_dir.mkdir(parents=True, exist_ok=True)
+
+        print(f"\n📁 Saving individual NPC files to: {npcs_dir}")
+
+        # Sort characters by first appearance
+        sorted_chars = sorted(self.characters.items(),
+                            key=lambda x: x[1]['first_appearance'])
+
+        for name, info in sorted_chars:
+            # Create safe filename
+            safe_name = "".join(c if c.isalnum() or c in (' ', '-', '_') else '_' for c in name)
+            npc_file = npcs_dir / f"{safe_name}.txt"
+
+            with open(npc_file, 'w', encoding='utf-8') as f:
+                f.write(f"{'='*60}\n")
+                f.write(f"CHARACTER: {name}\n")
+                f.write(f"{'='*60}\n\n")
+                f.write(f"First Appearance: {info['first_appearance']}\n")
+                f.write(f"Total Mentions: {info['mentions']}\n\n")
+                f.write(f"Description:\n")
+                f.write(f"{info['description']}\n")
+
+        print(f"✓ Saved {len(self.characters)} individual NPC files to: {npcs_dir}")
+
+        # Also save a combined index file
+        index_file = npcs_dir / "_index.txt"
+        with open(index_file, 'w', encoding='utf-8') as f:
+            f.write(f"{'='*60}\n")
+            f.write(f"CHARACTER INDEX - {session_name}\n")
+            f.write(f"{'='*60}\n\n")
+            f.write(f"Total Characters/NPCs: {len(self.characters)}\n\n")
+
+            for name, info in sorted_chars:
+                f.write(f"• {name} (appeared in {info['first_appearance']}, {info['mentions']} mentions)\n")
+
+        print(f"✓ Saved character index: {index_file.name}")
+
+    def show_character_editor(self, parent=None) -> Optional[Dict]:
+        """
+        Show a dialog to view and edit tracked characters/NPCs.
+
+        Args:
+            parent: Parent window for the dialog
+
+        Returns:
+            Updated characters dictionary if saved, None if cancelled
+        """
+        import tkinter as tk
+        from tkinter import scrolledtext, messagebox
+
+        # Create a working copy of characters
+        working_chars = {name: info.copy() for name, info in self.characters.items()}
+
+        result = [None]  # Store result
+
+        def on_save():
+            """Save changes and close"""
+            result[0] = working_chars
+            editor_dialog.destroy()
+
+        def on_cancel():
+            """Cancel changes and close"""
+            result[0] = None
+            editor_dialog.destroy()
+
+        # Track current character being edited
+        current_char_name = [None]
+
+        def format_character_card(name: str, info: dict) -> str:
+            """Format character info as a readable card"""
+            return f"""════════════════════════════════════════
+CHARACTER: {name}
+════════════════════════════════════════
+
+First Appearance: {info['first_appearance']}
+Mentions: {info['mentions']}
+
+Description:
+{info['description']}
+════════════════════════════════════════"""
+
+        def parse_character_card(card_text: str) -> tuple:
+            """Parse character card back to name and info dict"""
+            import re
+
+            # Extract name
+            name_match = re.search(r'CHARACTER:\s*(.+)', card_text)
+            if not name_match:
+                return None, None
+
+            name = name_match.group(1).strip()
+
+            # Extract first appearance
+            first_match = re.search(r'First Appearance:\s*(.+)', card_text)
+            first_appearance = first_match.group(1).strip() if first_match else "Unknown"
+
+            # Extract mentions
+            mentions_match = re.search(r'Mentions:\s*(\d+)', card_text)
+            mentions = int(mentions_match.group(1)) if mentions_match else 1
+
+            # Extract description (everything after "Description:" until the end line)
+            desc_match = re.search(r'Description:\s*\n(.*?)\n═+', card_text, re.DOTALL)
+            description = desc_match.group(1).strip() if desc_match else ""
+
+            return name, {
+                'first_appearance': first_appearance,
+                'mentions': mentions,
+                'description': description
+            }
+
+        def on_select_character(event=None):  # noqa: ARG001
+            """Load selected character into editor"""
+            selection = char_listbox.curselection()
+            if not selection:
+                return
+
+            idx = selection[0]
+            char_name = sorted_names[idx]
+            char_info = working_chars[char_name]
+            current_char_name[0] = char_name
+
+            # Format and display character card
+            card = format_character_card(char_name, char_info)
+            char_card_text.delete("1.0", tk.END)
+            char_card_text.insert("1.0", card)
+
+            # Enable save button for this character
+            save_char_button.config(state=tk.NORMAL)
+            delete_button.config(state=tk.NORMAL)
+
+        def on_save_character():
+            """Save current character edits"""
+            card_text = char_card_text.get("1.0", tk.END)
+            char_name, char_info = parse_character_card(card_text)
+
+            if not char_name or not char_info:
+                messagebox.showwarning("Invalid Format",
+                                     "Could not parse character card. Please check the format.",
+                                     parent=editor_dialog)
+                return
+
+            # If name changed, delete old entry
+            if current_char_name[0] and current_char_name[0] != char_name:
+                if current_char_name[0] in working_chars:
+                    del working_chars[current_char_name[0]]
+
+            # Update working copy
+            working_chars[char_name] = char_info
+            current_char_name[0] = char_name
+
+            # Refresh list
+            refresh_list()
+            messagebox.showinfo("Saved", f"Changes to '{char_name}' saved!", parent=editor_dialog)
+
+        def on_delete_character():
+            """Delete current character"""
+            if not current_char_name[0]:
+                return
+
+            if messagebox.askyesno("Confirm Delete",
+                                   f"Are you sure you want to delete '{current_char_name[0]}'?",
+                                   parent=editor_dialog):
+                del working_chars[current_char_name[0]]
+                current_char_name[0] = None
+                clear_editor()
+                refresh_list()
+
+        def clear_editor():
+            """Clear editor fields"""
+            char_card_text.delete("1.0", tk.END)
+            char_card_text.insert("1.0", char_card_template)
+            current_char_name[0] = None
+            save_char_button.config(state=tk.DISABLED)
+            delete_button.config(state=tk.DISABLED)
+
+        def refresh_list():
+            """Refresh character list"""
+            nonlocal sorted_names
+            char_listbox.delete(0, tk.END)
+            sorted_names = sorted(working_chars.keys())
+            for name in sorted_names:
+                info = working_chars[name]
+                char_listbox.insert(tk.END, f"{name} ({info['mentions']} mentions)")
+
+        # Create dialog
+        editor_dialog = tk.Toplevel(parent) if parent else tk.Toplevel()
+        editor_dialog.title("Character/NPC Editor")
+        editor_dialog.geometry("900x650")
+        editor_dialog.configure(bg="#ecf0f1")
+        if parent:
+            editor_dialog.transient(parent)
+            editor_dialog.grab_set()
+
+        # Header
+        header_frame = tk.Frame(editor_dialog, bg="#3498db", padx=20, pady=15)
+        header_frame.pack(fill=tk.X)
+        tk.Label(header_frame, text="Character & NPC Editor",
+                font=("Arial", 16, "bold"), bg="#3498db", fg="white").pack()
+        tk.Label(header_frame, text=f"Edit tracked characters and NPCs ({len(working_chars)} total)",
+                font=("Arial", 10), bg="#3498db", fg="#ecf0f1").pack()
+
+        # Main content - split pane
+        content_frame = tk.Frame(editor_dialog, bg="white")
+        content_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+
+        # Left: Character list
+        list_frame = tk.LabelFrame(content_frame, text="Characters", bg="white",
+                                    font=("Arial", 11, "bold"), padx=10, pady=10)
+        list_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
+
+        char_listbox = tk.Listbox(list_frame, font=("Arial", 10), selectmode=tk.SINGLE)
+        char_listbox.pack(fill=tk.BOTH, expand=True)
+        char_listbox.bind('<<ListboxSelect>>', on_select_character)
+
+        # Populate list
+        sorted_names = sorted(working_chars.keys())
+        for name in sorted_names:
+            info = working_chars[name]
+            char_listbox.insert(tk.END, f"{name} ({info['mentions']} mentions)")
+
+        # Right: Editor with formatted character card
+        editor_frame = tk.LabelFrame(content_frame, text="Character Details", bg="white",
+                                     font=("Arial", 11, "bold"), padx=15, pady=15)
+        editor_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+
+        # Info label
+        tk.Label(editor_frame, text="Edit the character information below in human-readable format:",
+                bg="white", font=("Arial", 9), fg="#7f8c8d").pack(anchor=tk.W, pady=(0, 10))
+
+        # Single text area for full character card
+        char_card_text = scrolledtext.ScrolledText(editor_frame, wrap=tk.WORD,
+                                                   font=("Consolas", 10),
+                                                   height=20, width=50)
+        char_card_text.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
+
+        # Template for empty character card
+        char_card_template = """════════════════════════════════════════
+CHARACTER: [Name]
+════════════════════════════════════════
+
+First Appearance: [Session Name]
+Mentions: [Count]
+
+Description:
+[Write character description here. Include:
+- Who they are (role, occupation, faction)
+- Physical appearance
+- Personality traits
+- Relationship to the party
+- Important actions or dialogue]
+════════════════════════════════════════"""
+
+        # Character action buttons
+        char_button_frame = tk.Frame(editor_frame, bg="white")
+        char_button_frame.pack(fill=tk.X, pady=(5, 0))
+
+        save_char_button = tk.Button(char_button_frame, text="💾 Save Character", command=on_save_character,
+                                     bg="#27ae60", fg="white", font=("Arial", 10, "bold"),
+                                     padx=10, pady=5, cursor="hand2", state=tk.DISABLED)
+        save_char_button.pack(side=tk.LEFT, padx=(0, 5))
+
+        delete_button = tk.Button(char_button_frame, text="🗑️ Delete", command=on_delete_character,
+                                  bg="#e74c3c", fg="white", font=("Arial", 10),
+                                  padx=10, pady=5, cursor="hand2", state=tk.DISABLED)
+        delete_button.pack(side=tk.LEFT)
+
+        # Bottom buttons
+        button_frame = tk.Frame(editor_dialog, bg="#ecf0f1", pady=15, padx=20)
+        button_frame.pack(fill=tk.X)
+
+        tk.Button(button_frame, text="✓ Save All Changes", command=on_save,
+                 bg="#27ae60", fg="white", font=("Arial", 12, "bold"),
+                 padx=30, pady=10, cursor="hand2").pack(side=tk.RIGHT, padx=(10, 0))
+        tk.Button(button_frame, text="Cancel", command=on_cancel,
+                 bg="#95a5a6", fg="white", font=("Arial", 10),
+                 padx=20, pady=10, cursor="hand2").pack(side=tk.RIGHT)
+
+        # Center dialog
+        editor_dialog.update_idletasks()
+        x = (editor_dialog.winfo_screenwidth() // 2) - (editor_dialog.winfo_width() // 2)
+        y = (editor_dialog.winfo_screenheight() // 2) - (editor_dialog.winfo_height() // 2)
+        editor_dialog.geometry(f"+{x}+{y}")
+
+        editor_dialog.wait_window()
+        return result[0]
+
     def show_final_summary_config(self, chunk_summaries: List[str], default_target_words: int = 1200, default_context_size: int = None) -> tuple:
         """
         Show a dialog to configure final summary settings based on actual chunk data
@@ -2141,7 +2678,7 @@ Summary to analyze:
             default_context_size: Default context size (None = unlimited)
 
         Returns:
-            Tuple of (model, target_words, context_size, include_characters) or None if cancelled
+            Tuple of (model, target_words, context_size, include_characters, custom_prompt) or None if cancelled
         """
         import tkinter as tk
 
@@ -2191,7 +2728,7 @@ Summary to analyze:
         result = [None]  # Store result
 
         def on_ok():
-            result[0] = (model_var.get(), target_words_var.get(), context_var.get(), include_chars_var.get())
+            result[0] = (model_var.get(), target_words_var.get(), context_var.get(), include_chars_var.get(), dialog_custom_prompt[0])
             dialog.destroy()
 
         def on_cancel():
@@ -2277,6 +2814,29 @@ Summary to analyze:
         tk.Checkbutton(chars_frame, text=f"Include character list in summary ({char_count} character{'s' if char_count != 1 else ''} tracked)",
                       variable=include_chars_var, bg="white", font=("Arial", 9)).pack(side=tk.LEFT, padx=5)
 
+        # Edit Characters button
+        def edit_characters():
+            """Open character editor dialog"""
+            if not self.characters:
+                messagebox.showinfo("No Characters", "No characters have been tracked yet.", parent=dialog)
+                return
+
+            # Show character editor
+            edited_chars = self.show_character_editor(dialog)
+            if edited_chars is not None:
+                # User saved changes
+                self.characters = edited_chars
+                # Update checkbox label with new count
+                char_count = len(self.characters)
+                chars_frame.winfo_children()[1].config(
+                    text=f"Include character list in summary ({char_count} character{'s' if char_count != 1 else ''} tracked)"
+                )
+
+        if char_count > 0:
+            tk.Button(chars_frame, text="📝 View/Edit Characters", command=edit_characters,
+                     bg="#3498db", fg="white", font=("Arial", 9),
+                     padx=8, pady=2, cursor="hand2").pack(side=tk.LEFT, padx=(10, 0))
+
         # Context size
         context_var = tk.IntVar(value=smart_default)
         context_frame = tk.Frame(settings_frame, bg="white")
@@ -2346,6 +2906,110 @@ Summary to analyze:
         warning_label = tk.Label(settings_frame, text="", bg="white", wraplength=500,
                                 justify=tk.LEFT, font=("Arial", 9))
         warning_label.pack(fill=tk.X, pady=(10, 0))
+
+        # Edit Instructions button
+        instructions_frame = tk.Frame(settings_frame, bg="white")
+        instructions_frame.pack(fill=tk.X, pady=(15, 0))
+
+        # Store custom final prompt (local to this dialog)
+        dialog_custom_prompt = [self.custom_final_prompt]
+
+        def edit_final_instructions():
+            """Open dialog to edit final summary instructions"""
+            from tkinter import scrolledtext
+
+            instr_dialog = tk.Toplevel(dialog)
+            instr_dialog.title("Edit Final Summary Instructions")
+            instr_dialog.geometry("850x700")
+            instr_dialog.transient(dialog)
+            instr_dialog.grab_set()
+
+            tk.Label(instr_dialog, text="Final Summary Instructions",
+                    font=("Arial", 14, "bold"), pady=10).pack()
+
+            tk.Label(instr_dialog, text="Edit the instructions sent to the AI for the final summary:",
+                    font=("Arial", 9), fg="#7f8c8d").pack(padx=10, pady=5)
+
+            # Default prompt
+            default_prompt = """Write a detailed narrative-style summary organized into these sections:
+
+## Session Overview (100-150 words)
+- Opening context: Where the party was and what they were doing
+- Primary objectives or goals for this session
+- Brief overview of major accomplishments
+
+## Detailed Session Narrative (800-1000 words)
+Write a chronological story of what happened. Include:
+- Specific locations visited with descriptions
+- NPC names and their roles
+- Dialogue highlights and important conversations
+- Each party member's actions and contributions
+- Combat encounters with tactics and outcomes
+- Skill checks, puzzles, or challenges
+- Items found, rewards gained, or resources used
+- Key decisions made and their immediate consequences
+
+## Character Highlights (150-200 words)
+For each party member:
+- Notable actions or heroic moments
+- Character development or backstory reveals
+- Relationships and interactions with NPCs or other PCs
+
+## Important NPCs & Discoveries (100-150 words)
+- List NPCs encountered with brief descriptions
+- New information learned about the world, plot, or mysteries
+
+## Session Conclusion & Next Steps (50-100 words)
+- Where the session ended
+- Immediate goals for next session
+- Unresolved questions or cliffhangers"""
+
+            text_frame = tk.Frame(instr_dialog)
+            text_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+            text_area = scrolledtext.ScrolledText(text_frame, wrap=tk.WORD, font=("Consolas", 10))
+            text_area.pack(fill=tk.BOTH, expand=True)
+            text_area.insert("1.0", dialog_custom_prompt[0] if dialog_custom_prompt[0] else default_prompt)
+
+            button_frame = tk.Frame(instr_dialog)
+            button_frame.pack(fill=tk.X, padx=10, pady=10)
+
+            def save_instructions():
+                prompt = text_area.get("1.0", tk.END).strip()
+                dialog_custom_prompt[0] = prompt
+
+                # Ask if user wants to save for future sessions
+                if messagebox.askyesno("Save Permanently?",
+                                     "Do you want to save these instructions permanently for all future sessions?\n\n" +
+                                     "• Yes = Save and use for all future summaries\n" +
+                                     "• No = Use only for this summary",
+                                     parent=instr_dialog):
+                    save_custom_final_prompt(prompt)
+                    messagebox.showinfo("Saved", "Instructions saved permanently and will be used for this summary!",
+                                      parent=instr_dialog)
+                else:
+                    messagebox.showinfo("Saved", "Instructions will be used for this summary only.",
+                                      parent=instr_dialog)
+                instr_dialog.destroy()
+
+            def reset_instructions():
+                if messagebox.askyesno("Reset", "Reset to default instructions?", parent=instr_dialog):
+                    dialog_custom_prompt[0] = None
+                    text_area.delete("1.0", tk.END)
+                    text_area.insert("1.0", default_prompt)
+
+            tk.Button(button_frame, text="💾 Save", command=save_instructions, bg="#27ae60", fg="white",
+                     font=("Arial", 10, "bold"), padx=20, pady=5).pack(side=tk.LEFT, padx=5)
+            tk.Button(button_frame, text="🔄 Reset to Default", command=reset_instructions, bg="#95a5a6", fg="white",
+                     font=("Arial", 10), padx=20, pady=5).pack(side=tk.LEFT, padx=5)
+            tk.Button(button_frame, text="❌ Cancel", command=instr_dialog.destroy, bg="#e74c3c", fg="white",
+                     font=("Arial", 10), padx=20, pady=5).pack(side=tk.RIGHT, padx=5)
+
+        tk.Label(instructions_frame, text="AI Instructions:", bg="white",
+                font=("Arial", 10), width=15, anchor=tk.W).pack(side=tk.LEFT)
+        tk.Button(instructions_frame, text="📝 Edit Instructions", command=edit_final_instructions,
+                 bg="#9b59b6", fg="white", font=("Arial", 9),
+                 padx=10, pady=2, cursor="hand2").pack(side=tk.LEFT, padx=5)
 
         def update_warning(*_):
             ctx = context_var.get()
@@ -2501,7 +3165,21 @@ Summary to analyze:
         if context_header:
             context_header = f"\n**CAMPAIGN CONTEXT:**\n{context_header}\n"
 
-        prompt = f"""You are creating a comprehensive final summary of a TTRPG session.
+        # Use custom prompt if provided, otherwise use default
+        if self.custom_final_prompt:
+            # Custom prompt - use as-is but add context and summaries
+            prompt = f"""You are creating a comprehensive final summary of a TTRPG session.
+Below are detailed summaries of different parts of the session in chronological order.
+{context_header}
+{self.custom_final_prompt}
+
+Part summaries:
+{combined}
+
+COMPREHENSIVE SESSION SUMMARY:"""
+        else:
+            # Default prompt
+            prompt = f"""You are creating a comprehensive final summary of a TTRPG session.
 Below are detailed summaries of different parts of the session in chronological order.
 {context_header}
 CRITICAL INSTRUCTIONS - READ CAREFULLY:
@@ -2783,23 +3461,28 @@ COMPREHENSIVE SESSION SUMMARY:"""
         print(f"MERGING TRANSCRIPTS")
         print(f"{'='*60}\n")
 
-        all_segments = []
-        for audio_file, transcript_data in file_transcripts.items():
-            speaker = file_to_speaker[audio_file]
-            # Add speaker info to each segment
-            for seg in transcript_data["segments"]:
-                seg["speaker"] = speaker
-            all_segments.extend(transcript_data["segments"])
+        # Use word-level merge if WhisperX was used (much better conversation flow)
+        if self.use_whisperx:
+            all_segments = self.merge_word_level_transcripts(file_transcripts, file_to_speaker)
+        else:
+            # Traditional segment-level merge with overlap truncation
+            all_segments = []
+            for audio_file, transcript_data in file_transcripts.items():
+                speaker = file_to_speaker[audio_file]
+                # Add speaker info to each segment
+                for seg in transcript_data["segments"]:
+                    seg["speaker"] = speaker
+                all_segments.extend(transcript_data["segments"])
 
-        # Sort by start time
-        all_segments.sort(key=lambda x: x["start"])
+            # Sort by start time
+            all_segments.sort(key=lambda x: x["start"])
 
-        print(f"Initial segments: {len(all_segments)} from {len(file_to_speaker)} speakers")
+            print(f"Initial segments: {len(all_segments)} from {len(file_to_speaker)} speakers")
 
-        # Split overlapping segments to preserve conversation flow
-        all_segments = self.split_overlapping_segments(all_segments)
+            # Split overlapping segments to preserve conversation flow
+            all_segments = self.split_overlapping_segments(all_segments)
 
-        print(f"After splitting overlaps: {len(all_segments)} segments")
+            print(f"After splitting overlaps: {len(all_segments)} segments")
 
         # Combine into full text
         full_text = " ".join(seg["text"].strip() for seg in all_segments)
@@ -2839,7 +3522,16 @@ COMPREHENSIVE SESSION SUMMARY:"""
 
         # Free up GPU memory before summarization
         print("\nFreeing GPU memory for Ollama...")
-        del self.whisper_model
+        if hasattr(self, 'whisper_model'):
+            del self.whisper_model
+        if hasattr(self, 'whisperx_model') and self.whisperx_model is not None:
+            del self.whisperx_model
+            self.whisperx_model = None
+        if hasattr(self, 'whisperx_align_model') and self.whisperx_align_model is not None:
+            del self.whisperx_align_model
+            del self.whisperx_align_metadata
+            self.whisperx_align_model = None
+            self.whisperx_align_metadata = None
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
             torch.cuda.synchronize()
@@ -2942,7 +3634,10 @@ COMPREHENSIVE SESSION SUMMARY:"""
                 print("Chunk summaries have been saved. You can generate the final summary later.")
                 return None
 
-            model, target_words, context_size, include_chars = config
+            model, target_words, context_size, include_chars, custom_prompt = config
+            # Update instance's custom final prompt with dialog value
+            if custom_prompt:
+                self.custom_final_prompt = custom_prompt
             print(f"\n✓ User confirmed settings:")
             print(f"  Model: {model}")
             print(f"  Target words: {target_words}")
@@ -2972,6 +3667,9 @@ COMPREHENSIVE SESSION SUMMARY:"""
         print(f"\n[Debug] Checking characters before save: {len(self.characters)} characters tracked")
         print(f"[Debug] Campaign file path: {self.campaign_character_file}")
         if self.characters:
+            # Always save individual NPC files to NPCs directory
+            self.save_npcs_to_directory(session_name)
+
             if self.campaign_character_file:
                 # Update campaign file
                 self.save_campaign_characters()
@@ -3196,7 +3894,16 @@ COMPREHENSIVE SESSION SUMMARY:"""
 
         # Free up GPU memory before summarization
         print("\nFreeing GPU memory for Ollama...")
-        del self.whisper_model
+        if hasattr(self, 'whisper_model'):
+            del self.whisper_model
+        if hasattr(self, 'whisperx_model') and self.whisperx_model is not None:
+            del self.whisperx_model
+            self.whisperx_model = None
+        if hasattr(self, 'whisperx_align_model') and self.whisperx_align_model is not None:
+            del self.whisperx_align_model
+            del self.whisperx_align_metadata
+            self.whisperx_align_model = None
+            self.whisperx_align_metadata = None
         if self.enable_diarization and self.diarization_pipeline:
             del self.diarization_pipeline
             self.diarization_pipeline = None
@@ -3309,7 +4016,10 @@ COMPREHENSIVE SESSION SUMMARY:"""
                 print("Chunk summaries have been saved. You can generate the final summary later.")
                 return None
 
-            model, target_words, context_size, include_chars = config
+            model, target_words, context_size, include_chars, custom_prompt = config
+            # Update instance's custom final prompt with dialog value
+            if custom_prompt:
+                self.custom_final_prompt = custom_prompt
             print(f"\n✓ User confirmed settings:")
             print(f"  Model: {model}")
             print(f"  Target words: {target_words}")
@@ -3344,6 +4054,9 @@ COMPREHENSIVE SESSION SUMMARY:"""
         print(f"\n[Debug] Checking characters before save: {len(self.characters)} characters tracked")
         print(f"[Debug] Campaign file path: {self.campaign_character_file}")
         if self.characters:
+            # Always save individual NPC files to NPCs directory
+            self.save_npcs_to_directory(audio_name)
+
             if self.campaign_character_file:
                 # Update campaign file
                 self.save_campaign_characters()
@@ -4510,13 +5223,13 @@ def configuration_gui():
                 print(f"✓ Created new campaign file: {char_file}")
 
         elif mode == "existing":
-            # Browse for existing file
+            # Browse for existing file (should be the main campaign tracking file, not individual NPC files)
             filename = filedialog.askopenfilename(
-                title="Select Campaign Character File",
-                initialdir=npcs_dir,
+                title="Select Campaign Character File (main tracking file)",
+                initialdir=SCRIPT_DIR,  # Start in main directory, not NPCs subdirectory
                 filetypes=[
-                    ("Markdown Files", "*.md"),
                     ("Text Files", "*.txt"),
+                    ("Markdown Files", "*.md"),
                     ("All Files", "*.*")
                 ]
             )
@@ -4592,6 +5305,26 @@ def configuration_gui():
     enable_diarization_var.trace_add('write', update_time_estimate)
     # Also update when processing mode changes
     processing_mode_var.trace_add('write', update_time_estimate)
+
+    # WhisperX option for word-level timestamps
+    use_whisperx_var = tk.BooleanVar(value=False)
+    whisperx_frame = tk.Frame(section4, bg="white", pady=10)
+    whisperx_frame.pack(fill=tk.X)
+
+    if WHISPERX_AVAILABLE:
+        tk.Checkbutton(whisperx_frame,
+                      text="Use WhisperX for word-level timestamps (better for overlapping speech)",
+                      variable=use_whisperx_var,
+                      bg="white",
+                      font=("Arial", 9)).pack(anchor=tk.W)
+        tk.Label(whisperx_frame,
+                text="⚠️ Note: WhisperX provides more precise timing but may be slower",
+                bg="white", fg="#e67e22", font=("Arial", 8, "italic")).pack(anchor=tk.W, padx=20)
+    else:
+        tk.Label(whisperx_frame,
+                text="⚠️ WhisperX not installed - install with: pip install whisperx",
+                bg="white", fg="#e74c3c", font=("Arial", 9)).pack(anchor=tk.W)
+        use_whisperx_var.set(False)
 
     # ===== SECTION 5: Ollama Models =====
     section5 = tk.LabelFrame(scrollable, text="  5. Ollama Summarization Models  ",
@@ -4771,9 +5504,20 @@ def configuration_gui():
     tk.Label(section6, text="Customize the instructions sent to the AI:",
              bg="white", font=("Arial", 9), fg="#7f8c8d").pack(anchor=tk.W, pady=(0, 10))
 
-    # Store custom prompts (None = use default)
-    custom_chunk_prompt = [None]
-    custom_final_prompt = [None]
+    # Load custom prompts from config (persists across sessions)
+    saved_chunk, saved_final = load_custom_prompts()
+    custom_chunk_prompt = [saved_chunk]
+    custom_final_prompt = [saved_final]
+
+    # Show indicator if custom prompts are loaded
+    if saved_chunk or saved_final:
+        prompts_loaded = []
+        if saved_chunk:
+            prompts_loaded.append("chunk")
+        if saved_final:
+            prompts_loaded.append("final")
+        tk.Label(section6, text=f"✓ Loaded saved custom prompts: {', '.join(prompts_loaded)}",
+                bg="white", font=("Arial", 9, "italic"), fg="#27ae60").pack(anchor=tk.W, pady=(0, 5))
 
     def edit_chunk_prompt():
         """Open dialog to edit chunk summarization prompt"""
@@ -4822,13 +5566,18 @@ Think of this as writing a session recap that captures the experience."""
         button_frame.pack(fill=tk.X, padx=10, pady=10)
 
         def save_prompt():
-            custom_chunk_prompt[0] = text_area.get("1.0", tk.END).strip()
-            messagebox.showinfo("Saved", "Chunk prompt saved! It will be used for summarization.")
+            prompt = text_area.get("1.0", tk.END).strip()
+            custom_chunk_prompt[0] = prompt
+            # Persist to config file
+            save_custom_chunk_prompt(prompt)
+            messagebox.showinfo("Saved", "Chunk prompt saved and will persist across sessions!")
             dialog.destroy()
 
         def reset_prompt():
             if messagebox.askyesno("Reset", "Reset to default prompt?"):
                 custom_chunk_prompt[0] = None
+                # Clear from config file
+                save_custom_chunk_prompt(None)
                 text_area.delete("1.0", tk.END)
                 text_area.insert("1.0", default_prompt)
 
@@ -4879,13 +5628,18 @@ Write in an engaging narrative style that captures the essence of the session.""
         button_frame.pack(fill=tk.X, padx=10, pady=10)
 
         def save_prompt():
-            custom_final_prompt[0] = text_area.get("1.0", tk.END).strip()
-            messagebox.showinfo("Saved", "Final summary prompt saved! It will be used for summarization.")
+            prompt = text_area.get("1.0", tk.END).strip()
+            custom_final_prompt[0] = prompt
+            # Persist to config file
+            save_custom_final_prompt(prompt)
+            messagebox.showinfo("Saved", "Final summary prompt saved and will persist across sessions!")
             dialog.destroy()
 
         def reset_prompt():
             if messagebox.askyesno("Reset", "Reset to default prompt?"):
                 custom_final_prompt[0] = None
+                # Clear from config file
+                save_custom_final_prompt(None)
                 text_area.delete("1.0", tk.END)
                 text_area.insert("1.0", default_prompt)
 
@@ -5086,7 +5840,10 @@ Write in an engaging narrative style that captures the essence of the session.""
                     stop_event=stop_event,
                     pause_event=pause_event,
                     campaign_character_file=character_file_var.get() if character_file_var.get() else None,
-                    preconfigured_final_summary=(final_config_mode_var.get() == "now")
+                    preconfigured_final_summary=(final_config_mode_var.get() == "now"),
+                    use_whisperx=use_whisperx_var.get(),
+                    custom_chunk_prompt=custom_chunk_prompt[0],
+                    custom_final_prompt=custom_final_prompt[0]
                 )
 
                 results = summarizer.process_multiple_audio_files(file_to_speaker, session_name=session_name)
@@ -5113,7 +5870,10 @@ Write in an engaging narrative style that captures the essence of the session.""
                     stop_event=stop_event,
                     pause_event=pause_event,
                     campaign_character_file=character_file_var.get() if character_file_var.get() else None,
-                    preconfigured_final_summary=(final_config_mode_var.get() == "now")
+                    preconfigured_final_summary=(final_config_mode_var.get() == "now"),
+                    use_whisperx=use_whisperx_var.get(),
+                    custom_chunk_prompt=custom_chunk_prompt[0],
+                    custom_final_prompt=custom_final_prompt[0]
                 )
 
                 results = summarizer.process_audio_file(audio_file)
@@ -5197,7 +5957,10 @@ Write in an engaging narrative style that captures the essence of the session.""
                         pause_event=pause_event,
                         skip_whisper_load=True,
                         campaign_character_file=character_file_var.get() if character_file_var.get() else None,
-                        preconfigured_final_summary=(final_config_mode_var.get() == "now")
+                        preconfigured_final_summary=(final_config_mode_var.get() == "now"),
+                        use_whisperx=False,  # Not used in transcript-only mode
+                        custom_chunk_prompt=custom_chunk_prompt[0],
+                        custom_final_prompt=custom_final_prompt[0]
                     )
 
                     # Get campaign context
@@ -5295,7 +6058,8 @@ Write in an engaging narrative style that captures the essence of the session.""
                     chunk_context_size=8192,
                     final_context_size=final_context_var.get(),
                     skip_whisper_load=True,  # Don't load Whisper for JSON-only mode
-                    campaign_character_file=character_file_var.get() if character_file_var.get() else None
+                    campaign_character_file=character_file_var.get() if character_file_var.get() else None,
+                    use_whisperx=False  # Not used in chunk-only mode
                 )
 
                 # Show popup to configure final summary
@@ -5310,7 +6074,10 @@ Write in an engaging narrative style that captures the essence of the session.""
                     write_to_console("⚠️ Final summary generation cancelled by user")
                     return
 
-                model, target_words, context_size, include_chars = config
+                model, target_words, context_size, include_chars, custom_prompt = config
+                # Update summarizer's custom final prompt with dialog value
+                if custom_prompt:
+                    summarizer.custom_final_prompt = custom_prompt
                 write_to_console(f"✓ User confirmed settings:")
                 write_to_console(f"  Model: {model}")
                 write_to_console(f"  Target words: {target_words}")
